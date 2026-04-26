@@ -1,3 +1,0 @@
-numpy>=2.0
-scipy>=1.11
-scikit-sparse>=0.4.16
