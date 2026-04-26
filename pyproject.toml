@@ -1,0 +1,26 @@
+[project]
+name = "high_dimensional_analysis_CSW"
+version = "0.0.1"
+authors = [
+  { name="Cassandra Soong", email="cassandra.soong-weiran@stud.uni-regensburg.de" },
+]
+description = "Python package for high dimensional data analysis as part of DAT-M-HIGHDIM project."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy >= 2.0",
+  "scipy >= 1.11",
+  "scikit-sparse >= 0.4.16",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = { text = "MIT" }
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

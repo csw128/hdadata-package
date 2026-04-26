@@ -1,0 +1,13 @@
+Metadata-Version: 2.4
+Name: high_dimensional_analysis_CSW
+Version: 0.0.1
+Summary: Python package for high dimensional data analysis as part of DAT-M-HIGHDIM project.
+Author-email: Cassandra Soong <cassandra.soong-weiran@stud.uni-regensburg.de>
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=2.0
+Requires-Dist: scipy>=1.11
+Requires-Dist: scikit-sparse>=0.4.16
