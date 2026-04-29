@@ -1,72 +1,338 @@
+from typing import Optional, Dict, Union, List
+import scipy.sparse as sp
+import pandas as pd
+import numpy as np
+
+
 class HDAData:
-    def __init__(self, X, obs=None, var=None, layers=None, trajectories=None):
-        self.X = X                      # gene expression matrix -> total RNA
-        self.obs = obs                  # cell metadata (barcodes)
-        self.var = var                  # gene metadata (features)  -> layers["ntr"] = new RNA
-        self.layers = layers or {}      # additional matrices (e.g. NTR)
-        self.trajectories = trajectories   # dynamics
+    def __init__(
+        self, 
+        X: sp.csr_matrix, 
+        obs: Optional[pd.DataFrame] = None, 
+        var: Optional[pd.DataFrame] = None, 
+        layers: Optional[Dict[str, sp.csr_matrix]] = None, 
+        trajectories: Optional[pd.DataFrame] = None
+        ) -> None:
+        
+        """Unified data structure for analaysis
+        
+        Args:
+            X:              gene expression matrix (old/total RNA)
+            obs:            cell metadata (e.g barcodes)
+            var:            gene metadata (e.g features) 
+            layers:         additional matrices (e.g layers["ntr"] (new RNA))
+                            other matrices needed for distance func / dynamic models etc
+            trajectories:   dynamics over time
+        
+        """
+        self.X = X                      
+        self.obs = self._set_obs_idx(obs)                  
+        self.var = self._set_var_idx(var)                  
+        self.layers = layers or {}      
+        self.trajectories = trajectories   
 
         self._validate()
+        self._create_idx_maps()
+    
 
-    def _validate(self):
-        '''
-        Checks shape consistency (rows=genes, columns=cells)
-        '''
+    def _validate(self) -> None:
+        """Validate shape consistency between X, obs, and var (rows=genes, columns=cells). 
+        
+        Raises:
+            ValueError: If X columns don't match obs length
+            ValueError: If X rows don't match var length
+            
+        """
         if self.obs is not None and self.X.shape[1] != len(self.obs):
-            raise ValueError(f"Mismatch: X has {self.X.shape[1]} columns but obs has {len(self.obs)} cells")
+            raise ValueError(f"Mismatch: X has {self.X.shape[1]} columns (cells) but obs has {len(self.obs)} cells")
 
         if self.var is not None and self.X.shape[0] != len(self.var):
-            raise ValueError(f"Mismatch: X has {self.X.shape[0]} rows but var has {len(self.var)} genes")
+            raise ValueError(f"Mismatch: X has {self.X.shape[0]} rows (genes) but var has {len(self.var)} genes")
+        
         
     @property
-    def n_obs(self):
-        '''
-        Returns number of observations (cells)
-        '''
+    def n_obs(self) -> int:
+        """Number of observations (cells). """
+
         return self.X.shape[1]
 
+
     @property
-    def n_vars(self):
-        '''
-        Returns of variables (genes)
-        '''
+    def n_vars(self) -> int:
+        """Number of variables (genes). """
+        
         return self.X.shape[0]
     
-    def __getitem__(self, index):
-        '''
-        Slicing matrix
-        '''
-        obs_idx, var_idx = index
-
-        X = self.X[obs_idx][:, var_idx]
-
-        obs = self.obs.iloc[obs_idx] if self.obs is not None else None
-        var = self.var.iloc[var_idx] if self.var is not None else None
-
-        layers = {
-            k: v[obs_idx][:, var_idx]
-            for k, v in self.layers.items()
-        }
-
-        return HDAData(X, obs=obs, var=var, layers=layers, trajectories=self.trajectories)
     
-    def __repr__(self):
-        '''
-        String representation method for object 
-        '''
+    def _set_obs_idx(
+        self, 
+        obs: Optional[pd.DataFrame]
+        )-> Optional[pd.DataFrame]:
+        
+        """Set observation index to cell line names. 
+        
+        """
+        if obs is None:
+            return None
+        
+        obs = obs.copy()
+
+        # if index is default integer range
+        if obs.index.equals(pd.RangeIndex(len(obs))):
+            obs.index = obs.iloc[:, 0]
+            obs = obs.drop(columns=[obs.columns[0]])
+
+        return obs
+    
+    
+    def _set_var_idx(
+        self, 
+        var: Optional[pd.DataFrame]
+        ) -> Optional[pd.DataFrame]:
+        """Set variable index to gene names. 
+        
+        """
+        if var is None:
+            return None
+        
+        var = var.copy()
+
+        if var.index.equals(pd.RangeIndex(len(var))):
+            var.index = var.iloc[:, 1]      # gene name at column 1 of var
+            var = var.drop(columns=[var.columns[1]])       
+
+        return var
+
+    
+    def _create_idx_maps(self) -> None:
+        """Create bidirectional mapping between names and integer indices for lookup:
+            1. cell name to index 
+            2. index to cell names
+            3. gene name to index
+            4. index to gene name
+        
+        """
+        if self.obs is not None:
+            self._cell_to_index = {cell: idx for idx, cell in enumerate(self.obs.index)}
+            self._index_to_cell = {idx: cell for idx, cell in enumerate(self.obs.index)}
+        else:
+            self._cell_to_index = {}
+            self._index_to_cell = {}
+
+        if self.var is not None:
+            self._gene_to_index = {gene: idx for idx, gene in enumerate(self.var.index)}
+            self._index_to_gene = {idx: gene for idx, gene in enumerate(self.var.index)}
+        else:
+            self._gene_to_index = {}
+            self._index_to_gene = {}
+    
+    
+    def __repr__(self) -> str:
+        """String representation method of the HDAData object. """
+        
         return (
             f"HDAData object with:\n"
-            f"  n_obs (cells): {self.n_obs}\n"
             f"  n_vars (genes): {self.n_vars}\n"
+            f"  n_obs (cells): {self.n_obs}\n"
             f"  X shape: {self.X.shape}\n"
             f"  layers: {list(self.layers.keys())}\n"
             f"  trajectories: {'Yes' if self.trajectories is not None else 'No'}"
         )
         
-    def show_nonzero(self, n=5):
-        '''
-        Cleaner representation of data in form of (row, col, value)
-        '''
+        
+    def show(self, n: int = 5) -> None:
+        """Display first n entries of X in coo (row, col, value) format.  
+    
+        Arguments:
+            n: number of entries to display
+      
+        """
         coo = self.X.tocoo()
         for i in range(min(n, len(coo.data))):
             print(coo.row[i], coo.col[i], coo.data[i])
+            
+    
+    def _range_check(
+        self, 
+        ref: Union[str, int], 
+        type=None
+        ) -> int:
+        
+        """Check if cell or gene name exist, or cell or gene index is within range.
+ 
+        Raises:
+            KeyError: If name of cell not found 
+            ValueError: If index out of range
+            
+        """
+        if ref is None:
+            return None
+    
+        if type=="cell":
+            if isinstance(ref, str):
+                if ref not in self._cell_to_index:
+                    raise KeyError(f"Cell '{ref}' not found")
+                return self._cell_to_index[ref] 
+        
+            else:
+                if ref < 0 or ref >= self.n_obs:
+                    raise ValueError(f"Cell index {ref} out of range")
+                return ref
+     
+        if type=="gene":
+            if isinstance(ref, str):
+                if ref not in self._gene_to_index:
+                    raise KeyError(f"Gene '{ref}' not found")
+                return self._gene_to_index[ref]
+                
+            else:
+                if ref < 0 or ref >= self.n_vars:
+                    raise ValueError(f"Gene index {ref} out of range")
+                return ref
+             
+    
+    def get_cell(
+        self, 
+        ref: Union[str, int]
+        ) -> sp.csr_matrix:
+        
+        """Get all genes for a specific cell.
+ 
+        """
+        cell_idx = self._range_check(ref, "cell")
+        return self.X[:, cell_idx:cell_idx+1]
+    
+    
+    def get_gene(
+        self, 
+        ref: Union[str, int]
+        ) -> sp.csr_matrix:
+        
+        """Get a specific gene across all cells.
+
+        """
+        gene_idx = self._range_check(ref, "gene")
+        return self.X[gene_idx:gene_idx+1, :]
+        
+    
+    def get_expression(
+        self, 
+        gene: Union[str, int], 
+        cell: Union[str, int]
+        ) -> sp.csr_matrix:
+        
+        """Get expression value for specific gene and cell. 
+        
+        """
+        gene_idx = self._range_check(gene, "gene")
+        cell_idx = self._range_check(cell, "cell")
+            
+        return self.X[gene_idx, cell_idx]
+    
+    
+    def _get_item_to_indices(
+        self, 
+        key: Union[str, int, list, slice, None], 
+        type: str
+        ) -> Union[str, int, list, slice, None]:
+        
+        """Convert string / slice / list to integer indices.
+        
+        Args:
+            key: Input (string, int, list, slice, or None)
+            type: Either "gene" or "cell"
+        
+        """
+        if key is None or key == slice(None):
+            return slice(None)
+    
+        # Case 1: single value
+        if isinstance(key, (int, str)):
+            return self._range_check(key, type)
+        
+        # Case 2: slice
+        if isinstance(key, slice):
+            start = self._range_check(key.start, type) if key.start is not None else None
+            stop = self._range_check(key.stop, type) if key.stop is not None else None
+            return slice(start, stop, key.step)
+        
+        # Case 3: list/array
+        if isinstance(key, (list, tuple)):
+            return [self._range_check(i, type) for i in key]
+        
+    
+    def _subset_metadata(
+        self, 
+        data: Optional[pd.DataFrame], 
+        key: Union[str, int, list, slice, None]
+        ) -> Optional[pd.DataFrame]:
+        
+        """Subset metadata df.
+        
+        """
+        if data is None:
+            return None
+        
+        if key == slice(None):
+            return data
+        
+        if isinstance(key, int):
+            return data.iloc[[key]]
+        
+        if isinstance(key, list):
+            return data.iloc[key]
+        
+        if isinstance(key, slice):
+            return data.iloc[key]
+        
+        return None
+    
+    
+    def __getitem__(self, key: tuple) -> 'HDAData':
+        """Slice or get subset of HDAData using gene or cell names.
+    
+        Args:
+            key: Tuple of (gene, cell) where each can be a slice, list, or integer index
+                    
+        Examples:
+            data['Gene1', 'Cell1']                      # Single gene and cell
+            data[['Gene1', 'Gene2'], :]                 # Multiple genes, all cells
+            data[:, ['Cell1', 'Cell2']]                 # All genes, specific cells
+            data['Gene1':'Gene10', 'Cell1':'Cell5']     # Slice by name
+            data[:5, ['Cell1', 'Cell2']]                # Slice by gene index and cell names
+            data[['Gene1', 'Gene2'], :5]                # Slice by gene name and cell index
+            data[10:20, 30:40]                          # Integer indexing
+    
+        Returns:
+            A new HDAData object containing the subset 
+            
+        """
+        gene_k, cell_k = key
+        
+        var_idx = self._get_item_to_indices(gene_k, "gene")
+        obs_idx = self._get_item_to_indices(cell_k, "cell")
+        
+        # Subset X
+        if isinstance(var_idx, slice) and var_idx == slice(None):
+            X_sub = self.X[:, obs_idx]
+        else:
+            X_sub = self.X[var_idx, :][:, obs_idx]
+        
+        # Subset metadata
+        var_sub = self._subset_metadata(self.var, var_idx)
+        obs_sub = self._subset_metadata(self.obs, obs_idx)
+
+        # Subset layers
+        layers_sub = {
+            k: (v[:, obs_idx] if isinstance(var_idx, slice) and var_idx == slice(None) 
+                else v[var_idx, :][:, obs_idx])
+            for k, v in self.layers.items()
+        }
+
+        return HDAData(
+            X_sub, 
+            obs=obs_sub, 
+            var=var_sub, 
+            layers=layers_sub, 
+            trajectories=self.trajectories
+        )

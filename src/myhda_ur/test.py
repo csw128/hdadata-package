@@ -17,11 +17,46 @@ data = HDAData(
     trajectories=traj
 )
 
-# print(data.X)
-# print(data.show_nonzero(10))
 
-# data_subset = data[[0, 5], [10, 20]]   # genes: 0, 5, cells: 10, 20
-# print(data_subset)
+# print(data)
+# print(data.X)
+# print(data.show(10))
+
+# print(data.get_cell("A549.10h.GAGCTGAGACTCTA"))
+# print(data.get_cell(1))
+
+# print(data.get_gene("MTOR-AS1"))
+# print(data.get_gene(1))
+
+# print(data.get_expression("MTOR-AS1", "A549.10h.GAGCTGAGACTCTA"))
+
+
+
+# # Test various indexing patterns
+# single_gene = data["MTOR-AS1", :]  
+# print(single_gene)
+# print(single_gene.X)
+
+# single_value = data["MTOR-AS1", "A549.10h.GAGCTGAGACTCTA"]  
+# print(single_value)
+
+# gene_list = data[["MTOR-AS1", "ANGPTL7"], :]
+# print(gene_list)
+
+# cell_list = data[:, ["A549.10h.GAGCTGAGACTCTA", "A549.0h.GGTCACGGCAACCA"]]
+# print(cell_list)
+
+# gene_slice = data["MTOR-AS1":"ANGPTL7", :]
+# print(gene_slice)
+
+# mixed_index = data[["MTOR-AS1", "ANGPTL7"], 10:20]
+# print(mixed_index)
+
+
+
+
+#################
+
 # rows, cols = data_subset.X.nonzero()
 # print(data_subset.X.nnz)    # check number of non-zero values (if 0, means matrix is all zeroes)
 # print(data_subset.X.toarray()) 
