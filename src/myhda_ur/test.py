@@ -1,26 +1,42 @@
-from read.load import read_mtx, read_tsv, read_csv
+from read.load import load_files
 from structure.object import HDAData
 
-X = read_mtx("../../data/matrix.mtx.gz")
-ntr = read_mtx("../../data/4sU.Binom.ntr.mtx.gz")
-
-obs = read_tsv("../../data/barcodes.tsv.gz")
-var = read_tsv("../../data/features.tsv.gz")
-
-traj = read_csv("../../data/trajectories_sci.csv")
+loaded = load_files(
+    gene_expression_matrix="../../data/matrix.mtx.gz",
+    barcodes_data="../../data/barcodes.tsv.gz",
+    features_data="../../data/features.tsv.gz",
+    new_to_total_ratio_matrix="../../data/4sU.Binom.ntr.mtx.gz",
+    trajectory_table="../../data/trajectories_sci.csv"
+)
 
 data = HDAData(
-    X,
-    obs=obs,
-    var=var,
-    layers={"ntr": ntr},
-    trajectories=traj
+    X=loaded["X"],
+    obs=loaded["obs"],
+    var=loaded["var"],
+    layers={"ntr": loaded["ntr"]},
+    trajectories=loaded["traj"]
 )
+
+# print(data.obs.head())
+# print("-------------------------")
+# print(data.var.head())
+
+# subset = data[10:20, 30:40]
+# print(subset.X)
+# print("-------------------------")
+# print(subset.show(subset.X, n=5, mode="coo"))
+# print("-------------------------")
+# print(subset.show(subset.X, n=10, mode="dense"))
+# print("-------------------------")
+# print(subset.show(subset.X, n=5, mode="label"))
+
 
 
 # print(data)
 # print(data.X)
-# print(data.show(10))
+
+# print("Show first 10 in X")
+# print(f'{data.show(data.X, 10)}\n')
 
 # print(data.get_cell("A549.10h.GAGCTGAGACTCTA"))
 # print(data.get_cell(1))
@@ -28,8 +44,8 @@ data = HDAData(
 # print(data.get_gene("MTOR-AS1"))
 # print(data.get_gene(1))
 
-# print(data.get_expression("MTOR-AS1", "A549.10h.GAGCTGAGACTCTA"))
-
+# print("Show gene expression of gene MTOR-AS1 and cell A549.10h.GAGCTGAGACTCTA")
+# print(f'{data.get_expression("MTOR-AS1", "A549.10h.GAGCTGAGACTCTA")}\n')
 
 
 # # Test various indexing patterns
@@ -40,8 +56,10 @@ data = HDAData(
 # single_value = data["MTOR-AS1", "A549.10h.GAGCTGAGACTCTA"]  
 # print(single_value)
 
+# print("Show all cells for these genes: MTOR-AS1, ANGPTL7")
 # gene_list = data[["MTOR-AS1", "ANGPTL7"], :]
-# print(gene_list)
+# print(f'{gene_list}\n')
+# print(gene_list.X)
 
 # cell_list = data[:, ["A549.10h.GAGCTGAGACTCTA", "A549.0h.GGTCACGGCAACCA"]]
 # print(cell_list)
@@ -52,11 +70,3 @@ data = HDAData(
 # mixed_index = data[["MTOR-AS1", "ANGPTL7"], 10:20]
 # print(mixed_index)
 
-
-
-
-#################
-
-# rows, cols = data_subset.X.nonzero()
-# print(data_subset.X.nnz)    # check number of non-zero values (if 0, means matrix is all zeroes)
-# print(data_subset.X.toarray()) 

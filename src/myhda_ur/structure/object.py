@@ -1,7 +1,6 @@
-from typing import Optional, Dict, Union, List
+from typing import Optional, Dict, Union
 import scipy.sparse as sp
 import pandas as pd
-import numpy as np
 
 
 class HDAData:
@@ -68,20 +67,31 @@ class HDAData:
         self, 
         obs: Optional[pd.DataFrame]
         )-> Optional[pd.DataFrame]:
+        """Set observation index to cell line names, and split information by dot to columns.
         
-        """Set observation index to cell line names. 
+        For example: "A549.4h.AAAACGATCCTGGA"
+        
+        index | cell | time | barcode
+        A549.4h.AAAACGATCCTGGA | A549 | 4h | AAAACGATCCTGGA
         
         """
         if obs is None:
             return None
         
         obs = obs.copy()
-
-        # if index is default integer range
-        if obs.index.equals(pd.RangeIndex(len(obs))):
-            obs.index = obs.iloc[:, 0]
-            obs = obs.drop(columns=[obs.columns[0]])
-
+        
+        names = obs.iloc[:, 0].astype(str)
+        split = names.str.split(".", expand=True)
+        
+        obs["cell"] = split[0]
+        obs["time"] = split[1]
+        obs["barcode"] = split[2]
+        
+        # Set obs index to full cell names
+        obs.index = names
+        
+        obs.rename(columns={0: "name"}, inplace=True)
+  
         return obs
     
     
@@ -89,7 +99,12 @@ class HDAData:
         self, 
         var: Optional[pd.DataFrame]
         ) -> Optional[pd.DataFrame]:
-        """Set variable index to gene names. 
+        """Set variable index to gene names, and split information by dot to columns.
+        
+        For example: "ENSG00000225602  MTOR-AS1  Gene Expression  Exonic (h.ens90)   705"
+     
+        index | gene id | gene symbol | feature type | annotation | length
+        MTOR-AS1 | ENSG00000225602 | MTOR-AS1 | Gene Expression | Exonic (h.ens90) | 705
         
         """
         if var is None:
@@ -97,10 +112,17 @@ class HDAData:
         
         var = var.copy()
 
-        if var.index.equals(pd.RangeIndex(len(var))):
-            var.index = var.iloc[:, 1]      # gene name at column 1 of var
-            var = var.drop(columns=[var.columns[1]])       
-
+        var.columns = [
+            "gene_id",
+            "gene_symbol",
+            "feature_type",
+            "annotation",
+            "length"
+        ]
+        
+        # Set var index to gene symbols
+        var.index = var["gene_symbol"]     
+        
         return var
 
     
@@ -140,24 +162,51 @@ class HDAData:
         )
         
         
-    def show(self, n: int = 5) -> None:
-        """Display first n entries of X in coo (row, col, value) format.  
+    def show(
+        self, 
+        matrix: Optional[sp.csr_matrix] = None, 
+        n: int = 5,
+        mode: str = "coo"
+        ) -> None:
+        """Display first n entries of matrix in different formats.
+        
+        Formats supported:
+            1. COO Coordinate List format -> (row, col, value)  
+            2. Dense format -> numeric matrix in numpy arrays
+            3. Labelled view -> labelled rows and columns pandas DataFrame
     
         Arguments:
-            n: number of entries to display
+            matrix: matrix to display (e.g X by default, or ntr)
+            n: number of entries to display 
+            mode: "coo", "dense", "label"
       
         """
-        coo = self.X.tocoo()
-        for i in range(min(n, len(coo.data))):
-            print(coo.row[i], coo.col[i], coo.data[i])
-            
-    
+        if matrix is None:
+            matrix = self.X
+        
+        if mode == "coo":
+            coo = matrix.tocoo()
+            for i in range(min(n, len(coo.data))):
+                return(coo.row[i], coo.col[i], coo.data[i])
+        
+        if mode == "dense":
+            return matrix[:n, :n].toarray()
+        
+        if mode == "label":
+            sub = matrix[:n, :n].toarray()
+
+            return pd.DataFrame(
+                sub,
+                index=self.var.index[:n],     
+                columns=self.obs.index[:n]    
+            )
+                
+
     def _range_check(
         self, 
         ref: Union[str, int], 
         type=None
         ) -> int:
-        
         """Check if cell or gene name exist, or cell or gene index is within range.
  
         Raises:
@@ -195,7 +244,6 @@ class HDAData:
         self, 
         ref: Union[str, int]
         ) -> sp.csr_matrix:
-        
         """Get all genes for a specific cell.
  
         """
@@ -207,7 +255,6 @@ class HDAData:
         self, 
         ref: Union[str, int]
         ) -> sp.csr_matrix:
-        
         """Get a specific gene across all cells.
 
         """
@@ -220,7 +267,6 @@ class HDAData:
         gene: Union[str, int], 
         cell: Union[str, int]
         ) -> sp.csr_matrix:
-        
         """Get expression value for specific gene and cell. 
         
         """
@@ -235,7 +281,6 @@ class HDAData:
         key: Union[str, int, list, slice, None], 
         type: str
         ) -> Union[str, int, list, slice, None]:
-        
         """Convert string / slice / list to integer indices.
         
         Args:
@@ -266,7 +311,6 @@ class HDAData:
         data: Optional[pd.DataFrame], 
         key: Union[str, int, list, slice, None]
         ) -> Optional[pd.DataFrame]:
-        
         """Subset metadata df.
         
         """
