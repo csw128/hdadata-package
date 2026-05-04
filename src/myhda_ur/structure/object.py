@@ -333,7 +333,7 @@ class HDAData:
     
     
     def __getitem__(self, key: tuple) -> 'HDAData':
-        """Slice or get subset of HDAData using gene or cell names.
+        """Slice or get subset of HDAData using gene or cell names or index.
     
         Args:
             key: Tuple of (gene, cell) where each can be a slice, list, or integer index

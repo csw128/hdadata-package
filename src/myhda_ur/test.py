@@ -10,34 +10,23 @@ loaded = load_files(
 )
 
 data = HDAData(
-    X=loaded["X"],
-    obs=loaded["obs"],
-    var=loaded["var"],
-    layers={"ntr": loaded["ntr"]},
-    trajectories=loaded["traj"]
+    X=loaded["gene_expression_matrix"],
+    obs=loaded["barcodes_data"],
+    var=loaded["features_data"],
+    layers={"ntr": loaded["new_to_total_ratio_matrix"]},
+    trajectories=loaded["trajectory_table"]
 )
-
-# print(data.obs.head())
-# print("-------------------------")
-# print(data.var.head())
-
-# subset = data[10:20, 30:40]
-# print(subset.X)
-# print("-------------------------")
-# print(subset.show(subset.X, n=5, mode="coo"))
-# print("-------------------------")
-# print(subset.show(subset.X, n=10, mode="dense"))
-# print("-------------------------")
-# print(subset.show(subset.X, n=5, mode="label"))
-
 
 
 # print(data)
 # print(data.X)
 
-# print("Show first 10 in X")
-# print(f'{data.show(data.X, 10)}\n')
+# print(data.obs.head())
+# print("-------------------------")
+# print(data.var.head())
 
+
+# # Test get 
 # print(data.get_cell("A549.10h.GAGCTGAGACTCTA"))
 # print(data.get_cell(1))
 
@@ -70,3 +59,13 @@ data = HDAData(
 # mixed_index = data[["MTOR-AS1", "ANGPTL7"], 10:20]
 # print(mixed_index)
 
+
+
+# subset = data[10:20, 30:40]
+# print(subset.X)
+# print("-------------------------")
+# print(subset.show(subset.X, n=5, mode="coo"))
+# print("-------------------------")
+# print(subset.show(subset.X, n=10, mode="dense"))
+# print("-------------------------")
+# print(subset.show(subset.X, n=5, mode="label"))

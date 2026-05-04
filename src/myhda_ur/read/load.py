@@ -73,8 +73,6 @@ def load_files(
         "X_path": gene_expression_matrix,
         "obs_path": barcodes_data,
         "var_path": features_data,
-        "ntr_path": new_to_total_ratio_matrix,
-        "traj_path": trajectory_table
     }
     
     for name, path in required.items():
@@ -88,9 +86,9 @@ def load_files(
     traj = read_csv(trajectory_table)
 
     return {
-        "X": X,
-        "obs": obs,
-        "var": var,
-        "ntr": ntr,
-        "traj": traj
+        "gene_expression_matrix": X,
+        "barcodes_data": obs,
+        "features_data": var,
+        "new_to_total_ratio_matrix": ntr,
+        "trajectory_table": traj
     }
