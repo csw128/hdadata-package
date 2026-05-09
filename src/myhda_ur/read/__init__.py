@@ -1,3 +1,3 @@
-from .load import read_mtx, read_tsv, read_csv, load_files
+from .loader import Loader
 
-__all__ = ["read_mtx", "read_tsv", "read_csv", "load_files"]
+__all__ = ["Loader"]

@@ -89,6 +89,7 @@ class HDAData:
         
         # Set obs index to full cell names
         obs.index = names
+        obs.index.name = "cell_name"
         
         obs.rename(columns={0: "name"}, inplace=True)
   
@@ -165,10 +166,11 @@ class HDAData:
     def show(
         self, 
         matrix: Optional[sp.csr_matrix] = None, 
-        n: int = 5,
+        n_rows: int = None,
+        n_cols: int = None,
         mode: str = "coo"
         ) -> None:
-        """Display first n entries of matrix in different formats.
+        """Display matrix in different formats with flexible row/column selection.
         
         Formats supported:
             1. COO Coordinate List format -> (row, col, value)  
@@ -177,28 +179,53 @@ class HDAData:
     
         Arguments:
             matrix: matrix to display (e.g X by default, or ntr)
-            n: number of entries to display 
+            n_rows: first n rows to display 
+            n_cols: first n columns to display 
             mode: "coo", "dense", "label"
       
         """
         if matrix is None:
             matrix = self.X
         
+        # Case 0: If no n_rows or n_cols specified, then show the full matrix
+        if n_rows is None and n_cols is None:
+            n_rows = matrix.shape[0]
+            n_cols = matrix.shape[1]
+            
+        # Case 1: If matrix only has 1 row or 1 column
+        if n_rows is None and matrix.shape[0] == 1:
+            n_rows = 1
+        if n_cols is None and matrix.shape[1] == 1:
+            n_cols = 1
+            
+        # Case 2: Check that n_rows and n_cols doesn't exceed the matrix size
+        if n_rows > matrix.shape[0] or n_cols > matrix.shape[1]:
+            raise ValueError(f'(n_rows, n_cols) cannot be larger than {matrix.shape[0], matrix.shape[1]}!')
+        
+        # Mode 1: COO
         if mode == "coo":
             coo = matrix.tocoo()
-            for i in range(min(n, len(coo.data))):
-                return(coo.row[i], coo.col[i], coo.data[i])
+            
+            mask = (coo.row < n_rows) & (coo.col < n_cols)
+            filtered_rows = coo.row[mask]
+            filtered_cols = coo.col[mask]
+            filtered_data = coo.data[mask]
+            
+            for i in range(len(filtered_data)):
+                return (filtered_rows[i], filtered_cols[i], filtered_data[i])
         
+        # Mode 2: Dense
         if mode == "dense":
-            return matrix[:n, :n].toarray()
+            return matrix[:n_rows, :n_cols].toarray()
         
+        # Mode 3: Labelled
         if mode == "label":
-            sub = matrix[:n, :n].toarray()
+            sub = matrix[:n_rows, :n_cols].toarray()
 
             return pd.DataFrame(
                 sub,
-                index=self.var.index[:n],     
-                columns=self.obs.index[:n]    
+                index=self.var.index[:n_rows],     
+                columns=self.obs.index[:n_cols]    
             )
                 
 
@@ -238,29 +265,7 @@ class HDAData:
                 if ref < 0 or ref >= self.n_vars:
                     raise ValueError(f"Gene index {ref} out of range")
                 return ref
-             
-    
-    def get_cell(
-        self, 
-        ref: Union[str, int]
-        ) -> sp.csr_matrix:
-        """Get all genes for a specific cell.
- 
-        """
-        cell_idx = self._range_check(ref, "cell")
-        return self.X[:, cell_idx:cell_idx+1]
-    
-    
-    def get_gene(
-        self, 
-        ref: Union[str, int]
-        ) -> sp.csr_matrix:
-        """Get a specific gene across all cells.
-
-        """
-        gene_idx = self._range_check(ref, "gene")
-        return self.X[gene_idx:gene_idx+1, :]
-        
+            
     
     def get_expression(
         self, 
