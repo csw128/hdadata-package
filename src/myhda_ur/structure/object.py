@@ -11,7 +11,7 @@ class HDAData:
         obs: Optional[pd.DataFrame] = None, 
         var: Optional[pd.DataFrame] = None, 
         layers: Optional[Dict[str, sp.csr_matrix]] = None, 
-        similarities: Optional[Dict[str, np.ndarray]] = None,
+        similarities: Optional[Dict[str, pd.DataFrame]] = None,
         trajectories: Optional[pd.DataFrame] = None
         ) -> None:
         

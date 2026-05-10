@@ -1,6 +1,7 @@
 from structure.object import HDAData
 from scipy.spatial.distance import correlation, cosine
 import numpy as np
+import pandas as pd
 
 
 def calc_correlation(x: np.ndarray, y: np.ndarray) -> float:
@@ -73,7 +74,8 @@ def compute_similarity(
     key: str = None,
     axis:str = None,
     method: str = None,
-    target: HDAData = None
+    target: HDAData = None,
+    name: str = None
     ) -> HDAData:
     """Compute similarity matrix.
     
@@ -113,7 +115,8 @@ def compute_similarity(
         # normalize if gene expression 
         if key == "X":
             vectors = normalize_c(vectors)
-        
+    
+    # Compute similarity matrix    
     n = vectors.shape[0]
     similarity = np.zeros((n, n), dtype=float)
     
@@ -126,10 +129,16 @@ def compute_similarity(
             else:
                 similarity[i, j] = metric(vectors[i], vectors[j])
  
-    sim_matrix_name = f"{axis}_{axis}_sim" if key == "X" else f"{axis}_{axis}_sim_{key}"
+    # Attach gene or cell names as labels for plotting convenience
+    if axis == "gene":
+        labels = data.var.index.tolist()
+    else:
+        labels = data.obs.index.tolist()
     
+    similarity_df = pd.DataFrame(similarity, index=labels, columns=labels)
+      
     # Feed result back into target data structure
     store = target if target is not None else data
-    store.similarities[sim_matrix_name] = similarity
+    store.similarities[name] = similarity_df
     
     return store
