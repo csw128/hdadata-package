@@ -11,6 +11,8 @@ dependencies = [
   "numpy >= 2.0",
   "scipy >= 1.11",
   "scikit-sparse >= 0.4.16",
+  "scikit-learn >= 1.6.1",
+  "altair >= 6.0.0"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

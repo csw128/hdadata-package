@@ -1,6 +1,7 @@
 from typing import Optional, Dict, Union
 import scipy.sparse as sp
 import pandas as pd
+import numpy as np
 
 
 class HDAData:
@@ -10,6 +11,7 @@ class HDAData:
         obs: Optional[pd.DataFrame] = None, 
         var: Optional[pd.DataFrame] = None, 
         layers: Optional[Dict[str, sp.csr_matrix]] = None, 
+        similarities: Optional[Dict[str, np.ndarray]] = None,
         trajectories: Optional[pd.DataFrame] = None
         ) -> None:
         
@@ -27,7 +29,8 @@ class HDAData:
         self.X = X                      
         self.obs = self._set_obs_idx(obs)                  
         self.var = self._set_var_idx(var)                  
-        self.layers = layers or {}      
+        self.layers = layers or {}   
+        self.similarities = similarities or {}   
         self.trajectories = trajectories   
 
         self._validate()
@@ -159,6 +162,7 @@ class HDAData:
             f"  n_obs (cells): {self.n_obs}\n"
             f"  X shape: {self.X.shape}\n"
             f"  layers: {list(self.layers.keys())}\n"
+            f"  similarities: {list(self.similarities.keys())}\n"
             f"  trajectories: {'Yes' if self.trajectories is not None else 'No'}"
         )
         
