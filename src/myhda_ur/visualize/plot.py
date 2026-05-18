@@ -10,10 +10,11 @@ def plot_heatmap(
         Heatmap types:
         - gene vs gene
         - cell vs cell
+        - trajectory vs trajectory
 
         Args:
             sim: Similarity dataframe 
-            type: "gene" or "cell"
+            type: "gene" or "cell" or "trajectory"
 
         Returns:
             Heatmap

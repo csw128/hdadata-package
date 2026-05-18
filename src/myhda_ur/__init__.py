@@ -1,4 +1,4 @@
-from .read import read_mtx, read_tsv, read_csv, load_files
+from .load import read_mtx, read_tsv, read_csv, load_files
 from .structure import HDAData
 
 __all__ = [

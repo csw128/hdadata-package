@@ -23,6 +23,7 @@ class HDAData:
             var:            gene metadata (e.g features) 
             layers:         additional matrices (e.g layers["ntr"] (new RNA))
                             other matrices needed for distance func / dynamic models etc
+            similarities:   similarity matrices (e.g gene-gene matrix)
             trajectories:   dynamics over time
         
         """
