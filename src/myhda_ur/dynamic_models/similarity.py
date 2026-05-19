@@ -44,7 +44,7 @@ def compute_similarity(
     
         Args:
             data: subset of original matrix such as X or ntr to be analyzed
-            key: the data from the subset to analyze (e.g "X" or "ntr")
+            key: the data from the subset to analyze (e.g "X" or "ntr" or "mean_ntr)
             kind: gene / cell / trajectory similarity ("gene" or "cell" or "trajectory")
             method: metric method ("correlation" or "cosine")
             target: object to store similarity matrix

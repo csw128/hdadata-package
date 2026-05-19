@@ -36,7 +36,7 @@ def plot_heatmap(
         y=alt.Y("variable:N", title=f"{type}", sort=None),
         color=alt.Color(
             "similarity:Q",
-            scale=alt.Scale(scheme="redpurple", domain=[0, 1]),
+            scale=alt.Scale(scheme="spectral", domain=[0, 1]),
             legend=alt.Legend(title="similarity")
         )
     )

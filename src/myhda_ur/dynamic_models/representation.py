@@ -3,13 +3,36 @@ from dynamic_models.distance import _normalize_c
 import numpy as np
 
 
+def _build_mean_ntr_matrix(
+    data: HDAData
+    ):
+    
+    ntr_hvg = data.layers["ntr"].toarray()
+    
+    trajectories = data.trajectories
+    timepoints = trajectories.columns.tolist()
+    
+    mean_ntr_matrix = np.zeros((ntr_hvg.shape[0], len(timepoints)))
+    
+    for col_idx, tp in enumerate(timepoints):
+        cells = trajectories[tp].tolist()
+        cell_indices = [data._cell_to_index[c] for c in cells]
+        # mean NTR across all cells in the trajectory time point for each HVG
+        mean_ntr_matrix[:, col_idx] = ntr_hvg[:, cell_indices].mean(axis=1)
+
+    return mean_ntr_matrix 
+    
+
 def _get_gene_vectors(
     data: HDAData,
-    key: str,
+    key: str
     ) -> np.ndarray:
     
     if key == "X":
         dense = data.X.toarray()
+        
+    if key == "mean_ntr":
+        dense = _build_mean_ntr_matrix(data)
 
     elif key in data.layers:
         dense = data.layers[key].toarray()
@@ -101,7 +124,7 @@ def _get_vectors(
     data: HDAData,
     key: str,
     kind: str,
-    trajectory_id
+    trajectory_id,
     ):
     
     if kind == "gene":
