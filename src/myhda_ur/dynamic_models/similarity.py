@@ -32,22 +32,22 @@ def _pairwise_similarity(
 
 
 def compute_similarity(
-    data: HDAData,
-    key: str,
-    kind: str,
-    trajectory_id = None,
+    input: HDAData,
+    target: HDAData,
+    key: str = None,
+    kind: str = None,
+    trajectory_id: list = None,
     method: str = None,
-    target: HDAData = None,
     name: str = None
     ) -> HDAData:
     """Compute similarity matrix.
     
         Args:
-            data: subset of original matrix such as X or ntr to be analyzed
+            input: subset of original matrix such as X or ntr to be analyzed
+            target: store result back to object itself (only for internal use by wrapper)
             key: the data from the subset to analyze (e.g "X" or "ntr" or "mean_ntr)
             kind: gene / cell / trajectory similarity ("gene" or "cell" or "trajectory")
             method: metric method ("correlation" or "cosine")
-            target: object to store similarity matrix
             name: name of similarity matrix to store
        
         Returns:
@@ -62,7 +62,7 @@ def compute_similarity(
 
     # build vectors
     vectors, labels = _get_vectors(
-                            data=data,
+                            input=input,
                             key=key,
                             kind=kind,
                             trajectory_id=trajectory_id
@@ -81,11 +81,9 @@ def compute_similarity(
                     )
 
     # store result
-    store = target if target is not None else data
-
     if name is None:
         name = f"{kind}_{method}_{key}"
 
-    store.similarities[name] = similarity_df
+    target.similarities[name] = similarity_df
 
-    return store
+    return target

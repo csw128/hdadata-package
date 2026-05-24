@@ -12,7 +12,7 @@ dependencies = [
   "scipy >= 1.11",
   "scikit-sparse >= 0.4.16",
   "scikit-learn >= 1.6.1",
-  "altair >= 6.0.0"
+  "plotly >= 6.6.0"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

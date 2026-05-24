@@ -13,16 +13,16 @@ def _calc_correlation(
             y: vector 2
         
         Returns:
-            similarity in range [0, 1]
-                - 1 = most similar  (perfect positive correlation, r = +1)
-                - 0 = most dissimilar 
+            similarity in range [-1, 1]
+                - 1 = most similar  
+                - -1 = most dissimilar 
                 
     """
-    # Avoid NaN for zero variance
+    # avoid NaN for zero vector
     if np.std(x) == 0 or np.std(y) == 0:   
         return 0.0
-    dist = correlation(x, y) 
-    return float(np.clip(1 - dist, 0, 1))
+    sim = 1 - correlation(x, y)   # correlation in [0, 2], sim in [-1, 1]
+    return sim
 
 
 def _calc_cosine(
@@ -37,15 +37,15 @@ def _calc_cosine(
         
         Returns:
             similarity in range [0, 1]
-                - 1 = most similar (identical direction, angle = 0°)
-                - 0 = most dissimilar (angle = 90°)
+                - 1 = most similar 
+                - -1 = most dissimilar
                 
     """
-    # Avoid NaN for zero vector
+    # avoid NaN for zero vector
     if np.linalg.norm(x) == 0 or np.linalg.norm(y) == 0:   
         return 0.0
-    dist = cosine(x, y) 
-    return float(np.clip(1 - dist, 0, 1))
+    sim = 1 - cosine(x, y)      # cosine in [0, 2], sim in [-1, 1]
+    return sim
 
 
 def _normalize_c(
@@ -63,8 +63,8 @@ def _normalize_c(
             normalized matrix
                 
     """
-    # Total counts per cell
+    # total counts per cell
     lib = vectors.sum(axis=1, keepdims=True) 
-    # Avoid NaN for zero vector
+    # avoid NaN for zero vector
     lib = np.where(lib == 0, 1, lib)
     return np.log1p(vectors / lib * scale)

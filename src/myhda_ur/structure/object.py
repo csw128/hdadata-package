@@ -390,3 +390,62 @@ class HDAData:
             layers=layers_sub, 
             trajectories=self.trajectories
         )
+    
+    
+    def compute_similarity(
+        self,
+        input,
+        key: str,
+        kind: str,
+        trajectory_id=None,
+        method: str = None,
+        name: str = None
+        ):
+        
+        from dynamic_models.similarity import compute_similarity as _compute_similarity
+        return _compute_similarity(
+            input=input,
+            target=self,  
+            key=key,
+            kind=kind,
+            trajectory_id=trajectory_id,
+            method=method,
+            name=name
+        )
+
+
+    def get_highly_variable_genes(
+        self,
+        n: int
+        ) -> list:
+
+        from myhda_ur.dynamic_models.selector import get_highly_variable_genes as _get_highly_variable_genes
+        return _get_highly_variable_genes(
+            input=self,
+            n=n
+            )
+        
+        
+    def get_timepoint_cells(
+        self,
+        n_samples_per_timepoint: int
+        ) -> list:
+        
+        from myhda_ur.dynamic_models.selector import get_timepoint_cells as _get_timepoint_cells
+        return _get_timepoint_cells(
+            input=self,
+            n_samples_per_timepoint=n_samples_per_timepoint
+            )
+        
+        
+    def get_highly_dynamic_trajectories(
+        self,
+        n: int
+        ) -> list:
+
+        from myhda_ur.dynamic_models.selector import get_highly_dynamic_trajectories as _get_highly_dynamic_trajectories
+        return _get_highly_dynamic_trajectories(
+            input=self,
+            n=n
+            )
+    

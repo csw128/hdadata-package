@@ -1,62 +1,123 @@
+import numpy as np
 import pandas as pd
-import altair as alt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from scipy.cluster.hierarchy import linkage, dendrogram
+from scipy.spatial.distance import squareform
 
 
 def plot_heatmap(
     sim: pd.DataFrame,
-    type: str = None        
-    ) -> alt.Chart:
-    """Plot interactive heatmap based on similarity matrix.
-        Heatmap types:
-        - gene vs gene
-        - cell vs cell
-        - trajectory vs trajectory
+    type: str = None,
+    cluster: bool = False
+    ) -> go.Figure:
 
-        Args:
-            sim: Similarity dataframe 
-            type: "gene" or "cell" or "trajectory"
+    labels = list(sim.index)
+    n = len(labels)
 
-        Returns:
-            Heatmap
-            
-    """
-    row_label = sim.index.name or "index"
+    # configurations
+    CELL_PX        = 40          # fixed matrix cell size in 40x40 px
+    DENDRO_PX      = 120         # fixed dendrogram height in 120 px
+    MARGIN_TOP     = 60          
+    MARGIN_RIGHT   = 120         
+    MARGIN_LEFT    = 20
+    MARGIN_BOTTOM  = 20
+    CHAR_PX        = 7           # approx pixels per character 
+    TICK_OFFSET    = 10          # extra padding beyond label length
 
-    # melt wide format to long format (identifier, variable, value)
-    df_long = sim.reset_index().melt(
-        id_vars="index",                # identifier variable
-        var_name="variable",            # name for unpivoted variable column
-        value_name="similarity"         # name for value column
-    )
+    max_label_len  = max(len(l) for l in labels)
+    label_px       = max_label_len * CHAR_PX + TICK_OFFSET
 
-    base = alt.Chart(df_long, title=f'{type} vs {type} similarity')
+    margin_left_y = MARGIN_LEFT + label_px   
+    margin_bottom_x = MARGIN_BOTTOM + label_px   
 
-    heatmap = base.mark_rect().encode(
-        x=alt.X(f"{row_label}:N", title=f"{type}", sort=None),  # don't sort alphabetically
-        y=alt.Y("variable:N", title=f"{type}", sort=None),
-        color=alt.Color(
-            "similarity:Q",
-            scale=alt.Scale(scheme="spectral", domain=[0, 1]),
-            legend=alt.Legend(title="similarity")
+    heatmap_px = n * CELL_PX
+    dendro_px  = DENDRO_PX if cluster else 0
+
+    # final figure size
+    total_w = margin_left_y + heatmap_px + MARGIN_RIGHT
+    total_h = MARGIN_TOP + dendro_px + heatmap_px + margin_bottom_x
+
+    # dendrogram as fraction of total plot height 
+    dendro_frac  = dendro_px  / (dendro_px + heatmap_px)
+    heatmap_frac = heatmap_px / (dendro_px + heatmap_px)
+
+    if cluster:
+        dist = np.clip(1 - sim.values, 0, None)
+        np.fill_diagonal(dist, 0)
+        condensed = squareform(dist, checks=False)
+
+        # hierarchical clustering
+        Z = linkage(condensed, method="ward")
+        dendro_info = dendrogram(Z, labels=labels, no_plot=True)
+        order = dendro_info["leaves"]
+        ordered_labels = [labels[i] for i in order]
+        sim_ordered = sim.iloc[order, :].iloc[:, order]
+
+        fig = make_subplots(
+            rows=2, cols=1,
+            row_heights=[dendro_frac, heatmap_frac],
+            vertical_spacing=0.0,
         )
+
+        def dendro_traces(Z, labels):
+            info = dendrogram(Z, labels=labels, no_plot=True)
+            x_coord_branch = np.array(info["icoord"])
+            y_coord_branch = np.array(info["dcoord"])
+            traces = []
+            for xs, ys in zip(x_coord_branch, y_coord_branch):
+                traces.append(go.Scatter(
+                    x=xs, y=ys,
+                    mode="lines",
+                    line=dict(color="gray", width=1),
+                    hoverinfo="skip",
+                    showlegend=False,
+                ))
+            return traces
+
+        for tr in dendro_traces(Z, ordered_labels):
+            fig.add_trace(tr, row=1, col=1)
+
+        fig.update_xaxes(visible=False, row=1, col=1)
+        fig.update_yaxes(visible=False, row=1, col=1)
+
+        heatmap_row = 2
+
+    else:
+        ordered_labels = labels
+        sim_ordered = sim
+        fig = go.Figure()
+        heatmap_row = None
+
+    heatmap = go.Heatmap(
+        z=sim_ordered.values,
+        x=ordered_labels,
+        y=ordered_labels,
+        colorscale="Spectral",
+        colorbar=dict(title="similarity", len=0.85, y=0.4),
+        hovertemplate=(
+            f"<b>{type} x</b>: %{{x}}<br>"
+            f"<b>{type} y</b>: %{{y}}<br>"
+            f"<b>similarity</b>: %{{z:.3f}}<extra></extra>"
+        ),
     )
 
-    grid = base.mark_rect(
-        fill="transparent",
-        stroke="white",
-        strokeWidth=0.5
-    ).encode(
-        x=alt.X(f"{row_label}:N", sort=None),
-        y=alt.Y("variable:N", sort=None),
-        tooltip=[                                       
-            alt.Tooltip(f"{row_label}:N", title="gene x"),
-            alt.Tooltip("variable:N", title="gene y"),
-            alt.Tooltip("similarity:Q", title="similarity", format=".3f")
-        ]
+    if heatmap_row:
+        fig.add_trace(heatmap, row=heatmap_row, col=1)
+        fig.update_xaxes(tickangle=45, row=heatmap_row, col=1)
+        fig.update_yaxes(autorange="reversed", row=heatmap_row, col=1)
+    else:
+        fig.add_trace(heatmap)
+        fig.update_xaxes(tickangle=45)
+        fig.update_yaxes(autorange="reversed")
+
+    fig.update_layout(
+        title=f"{type} vs {type} similarity",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        width=int(total_w),
+        height=int(total_h),
+        margin=dict(l=int(margin_left_y), r=MARGIN_RIGHT, t=MARGIN_TOP, b=int(margin_bottom_x)),
     )
-    
-    return (heatmap + grid).properties(
-        width=alt.Step(50),
-        height=alt.Step(50)
-    )
-    
+
+    return fig
