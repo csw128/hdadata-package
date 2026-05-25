@@ -1,5 +1,5 @@
 [project]
-name = "high_dimensional_analysis_CSW"
+name = "myhda_ur"
 version = "0.0.1"
 authors = [
   { name="Cassandra Soong", email="cassandra.soong-weiran@stud.uni-regensburg.de" },

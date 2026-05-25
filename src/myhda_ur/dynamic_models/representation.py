@@ -1,22 +1,32 @@
-from structure.object import HDAData
-from dynamic_models.distance import _normalize_c
+from ..structure.object import HDAData
+from ..dynamic_models.distance import _normalize_c
 import numpy as np
+import scipy.sparse as sp
 
 
 def _build_mean_ntr_matrix(
-    input: HDAData
-    ):
+    data: HDAData
+    ) -> np.ndarray:
+    """For each timepoint, compute the mean NTR across all cells assigned to that timepoint, yielding one value per gene. 
     
-    ntr_hvg = input.layers["ntr"].toarray()
+    Args:
+        data:
+            data object
     
-    trajectories = input.trajectories
+    Returns:
+        matrix of shape (genes x timepoints)
+        
+    """
+    ntr_hvg = data.layers["ntr"].toarray()
+    
+    trajectories = data.trajectories
     timepoints = trajectories.columns.tolist()
     
     mean_ntr_matrix = np.zeros((ntr_hvg.shape[0], len(timepoints)))
     
     for col_idx, tp in enumerate(timepoints):
         cells = trajectories[tp].tolist()
-        cell_indices = [input._cell_to_index[c] for c in cells]
+        cell_indices = [data._cell_to_index[c] for c in cells]
         # mean NTR across all cells in the trajectory time point for each HVG
         mean_ntr_matrix[:, col_idx] = ntr_hvg[:, cell_indices].mean(axis=1)
 
@@ -24,18 +34,29 @@ def _build_mean_ntr_matrix(
     
 
 def _get_gene_vectors(
-    input: HDAData,
+    data: HDAData,
     key: str
     ) -> np.ndarray:
+    """Build gene vectors based on key.
     
+    Args:
+        data:
+            data object
+        key: "X" / "ntr" / "mean_ntr"
+            gene expression or NTR value to create vectors from
+
+    Returns:
+        gene vectors
+        
+    """
     if key == "X":
-        dense = input.X.toarray()
+        dense = data.X.toarray()
         
     elif key == "mean_ntr":
-        dense = _build_mean_ntr_matrix(input)
+        dense = _build_mean_ntr_matrix(data)
 
-    elif key in input.layers:
-        dense = input.layers[key].toarray()
+    elif key in data.layers:
+        dense = data.layers[key].toarray()
 
     else:
         raise ValueError(f"{key} not found in HDAData.")
@@ -44,16 +65,30 @@ def _get_gene_vectors(
 
 
 def _get_cell_vectors(
-    input: HDAData,
+    data: HDAData,
     key: str,
     normalize: bool = True
     ) -> np.ndarray:
+    """Build cell vectors based on key.
     
+    Args:
+        data:
+            data object
+        key: "X" / "ntr" 
+            gene expression or NTR value to create vectors from
+        normalize: True / False
+            True = normalize if gene expression values used
+            False = no normalization if ntr used
+            
+    Returns:
+        cell vectors
+        
+    """
     if key == "X":
-        dense = input.X.toarray()
+        dense = data.X.toarray()
 
-    elif key in input.layers:
-        dense = input.layers[key].toarray()
+    elif key in data.layers:
+        dense = data.layers[key].toarray()
 
     else:
         raise ValueError(f"{key} not found in HDAData.")
@@ -67,11 +102,26 @@ def _get_cell_vectors(
 
 
 def _build_trajectory_matrix(
-    input: HDAData,
-    key,
-    trajectory_id
-    ):
+    data: HDAData,
+    key: sp.csr_matrix,
+    trajectory_id: list
+    ) -> tuple[np.ndarray, list[str]]: 
+    """For each trajectory, extract gene expression or NTR values for all cells belonging to 
+    that trajectory and flattens them into a single vector of shape (genes x timepoints).
+    All trajectory vectors are stacked row-wise.
+
+    Args:
+        data:
+            data object
+        key: data.X / data.layers["ntr"]
+            gene expression or NTR matrix
+        trajectory_id:
+            list of trajectory IDs to create vectors from
     
+    Returns:
+        matrix of shape (trajectories x genes*timepoints), and labels
+        
+    """
     trajectory_id = list(trajectory_id)
     
     vectors = []
@@ -79,9 +129,9 @@ def _build_trajectory_matrix(
     
     # build one vector per trajectory
     for id in trajectory_id:
-        traj = input.trajectories.loc[id]
+        traj = data.trajectories.loc[id]
         cells = traj.tolist()
-        cell_idx = [input._cell_to_index[c] for c in cells]
+        cell_idx = [data._cell_to_index[c] for c in cells]
 
         # extract gene x timepoints 
         sub = key[:, cell_idx]
@@ -97,22 +147,38 @@ def _build_trajectory_matrix(
     
 
 def _get_trajectory_vectors(
-    input: HDAData,
+    data: HDAData,
     key: str,
-    trajectory_id,
-    normalize
+    trajectory_id: list,
+    normalize: bool
     ):
+    """Build trajectory vectors based on key.
     
+    Args:
+        data:
+            data object
+        key: "X" / "ntr" 
+            gene expression or NTR value to create vectors from
+        trajectory_id:
+            list of trajectory IDs to create vectors from
+        normalize: True / False
+            True = normalize if gene expression values used
+            False = no normalization if ntr used
+            
+    Returns:
+        trajectory vectors and labels
+        
+    """
     if key == "X":
-        key = input.X
+        key = data.X
     
-    elif key in input.layers:
-        key = input.layers[key]
+    elif key in data.layers:
+        key = data.layers[key]
         
     else:
         raise ValueError(f"{key} not found in HDAData.")
     
-    vectors, labels = _build_trajectory_matrix(input, key, trajectory_id)
+    vectors, labels = _build_trajectory_matrix(data, key, trajectory_id)
     
     if normalize:
         vectors = _normalize_c(vectors)         
@@ -121,26 +187,41 @@ def _get_trajectory_vectors(
 
 
 def _get_vectors(
-    input: HDAData,
+    data: HDAData,
     key: str,
     kind: str,
-    trajectory_id,
-    ):
+    trajectory_id: list,
+    ) -> tuple[np.ndarray, list[str]]: 
+    """Helper to call the corresponding functions to create gene, cell or trajectory vectors.
     
+    Args:
+        data:
+            data object
+        key: "X" / "ntr" / "mean_ntr"
+            gene expression or NTR value to create vectors from
+        kind: "gene" / "cell" / "trajectory"
+            type of vectors to create
+        trajectory_id:
+            list of trajectory IDs to create vectors from
+    
+    Returns:
+        vectors and labels
+        
+    """
     if kind == "gene":
 
-        vectors = _get_gene_vectors(input, key)
-        labels = input.var.index.tolist()
+        vectors = _get_gene_vectors(data, key)
+        labels = data.var.index.tolist()
 
     elif kind == "cell":
 
         normalize = (key == "X")
-        vectors = _get_cell_vectors(input, key, normalize)
-        labels = input.obs.index.tolist()
+        vectors = _get_cell_vectors(data, key, normalize)
+        labels = data.obs.index.tolist()
         
     elif kind == "trajectory":
         normalize = (key == "X")
-        vectors, labels = _get_trajectory_vectors(input, key, trajectory_id, normalize)
+        vectors, labels = _get_trajectory_vectors(data, key, trajectory_id, normalize)
         
     else:
         raise ValueError(f'Unknown kind "{kind}". Must be either "gene", "cell", or "trajectory".')

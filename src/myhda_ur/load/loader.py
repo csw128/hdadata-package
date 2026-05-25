@@ -4,7 +4,7 @@ import pandas as pd
 import scipy.sparse as sp
 from scipy.io import mmread
 from typing import Dict, Optional, Union
-from structure.object import HDAData
+from ..structure.object import HDAData
 
 
 class Loader:
@@ -17,19 +17,19 @@ class Loader:
         Args: 
             dir: default /data directory or user specificed folder path
         """
-        self.dir = Path(dir) if dir else Path("../../data")
+        self.dir = Path(__file__).parent.parent.parent.parent / "data"
     
     
     @staticmethod
     def read_mtx(path: Union[str, Path]) -> sp.csr_matrix:
         """Read the Matrix Market (.mtx or .mtx.gz)) file as a sparse matrix. 
         The sparse matrix is converted to Compressed Sparse Row (csr) format.
-            
-            Args:
-                path: path to the input .mtx or .mtx.gz file
         
-            Returns:
-                sparse matrix in csr format
+        Args:
+            path: path to the input .mtx or .mtx.gz file
+    
+        Returns:
+            sparse matrix in csr format
                 
         """
         path = Path(path)
@@ -43,11 +43,11 @@ class Loader:
     def read_tsv(path: Union[str, Path]) -> pd.DataFrame:
         """Read .tsv file as pandas Dataframe. 
             
-            Args:
-                path: path to the input .tsv file
-        
-            Returns:
-                dataframe with the TSV contents       
+        Args:
+            path: path to the input .tsv file
+    
+        Returns:
+            dataframe with the TSV contents       
                 
         """
         path = Path(path)
@@ -59,11 +59,11 @@ class Loader:
     def read_csv(path: Union[str, Path]) -> pd.DataFrame:
         """Read .csv file as a pd Dataframe. 
             
-            Args:
-                path: path to the input .csv file
-        
-            Returns:
-                dataframe with the CSV contents  
+        Args:
+            path: path to the input .csv file
+    
+        Returns:
+            dataframe with the CSV contents  
                 
         """
         return pd.read_csv(path, index_col=0)
@@ -75,8 +75,8 @@ class Loader:
         ) -> Path:
         """Resolve file path
         
-            Args:
-                key: file identifier
+        Args:
+            key: file identifier
                 
         """
         default_map = {
@@ -96,8 +96,8 @@ class Loader:
         ) -> Dict: 
         """Load all the data files.
             
-            Returns:
-                dictionary with file data loaded 
+        Returns:
+            dictionary with file data loaded 
                 
         """
         required = ['gene_expression_matrix', 'barcodes_data', 'features_data']
@@ -142,6 +142,7 @@ class Loader:
         
         Returns:
             HDAData Object
+            
         """
         loaded = self.load_files()
         

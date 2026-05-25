@@ -1,7 +1,6 @@
 from typing import Optional, Dict, Union
 import scipy.sparse as sp
 import pandas as pd
-import numpy as np
 
 
 class HDAData:
@@ -19,10 +18,9 @@ class HDAData:
         
         Args:
             X:              gene expression matrix (old/total RNA)
-            obs:            cell metadata (e.g barcodes)
-            var:            gene metadata (e.g features) 
+            obs:            cell metadata (barcodes)
+            var:            gene metadata (features) 
             layers:         additional matrices (e.g layers["ntr"] (new RNA))
-                            other matrices needed for distance func / dynamic models etc
             similarities:   similarity matrices (e.g gene-gene matrix)
             trajectories:   dynamics over time
         
@@ -107,10 +105,10 @@ class HDAData:
         """Set variable index to gene names, and split information by dot to columns.
         
         For example: "ENSG00000225602  MTOR-AS1  Gene Expression  Exonic (h.ens90)   705"
-     
+    
         index | gene id | gene symbol | feature type | annotation | length
         MTOR-AS1 | ENSG00000225602 | MTOR-AS1 | Gene Expression | Exonic (h.ens90) | 705
-        
+    
         """
         if var is None:
             return None
@@ -244,7 +242,7 @@ class HDAData:
         Raises:
             KeyError: If name of cell not found 
             ValueError: If index out of range
-            
+                
         """
         if ref is None:
             return None
@@ -294,9 +292,11 @@ class HDAData:
         """Convert string / slice / list to integer indices.
         
         Args:
-            key: Input (string, int, list, slice, or None)
-            type: Either "gene" or "cell"
-        
+            key: 
+                input of cell / gene name or indices
+            type: "gene" / "cell"
+                item type whether gene or cell
+            
         """
         if key is None or key == slice(None):
             return slice(None)
@@ -394,17 +394,19 @@ class HDAData:
     
     def compute_similarity(
         self,
-        input,
+        data,
         key: str,
         kind: str,
-        trajectory_id=None,
+        trajectory_id: list = None,
         method: str = None,
         name: str = None
         ):
-        
-        from dynamic_models.similarity import compute_similarity as _compute_similarity
+        """Wrapper method to call compute_similarity() from HDAData object.
+     
+        """
+        from ..dynamic_models.similarity import compute_similarity as _compute_similarity
         return _compute_similarity(
-            input=input,
+            data=data,
             target=self,  
             key=key,
             kind=kind,
@@ -418,23 +420,27 @@ class HDAData:
         self,
         n: int
         ) -> list:
-
-        from myhda_ur.dynamic_models.selector import get_highly_variable_genes as _get_highly_variable_genes
+        """Wrapper method to call get_highly_variable_genes() from HDAData object.
+    
+        """
+        from ..dynamic_models.selector import get_highly_variable_genes as _get_highly_variable_genes
         return _get_highly_variable_genes(
-            input=self,
+            data=self,
             n=n
             )
         
         
     def get_timepoint_cells(
         self,
-        n_samples_per_timepoint: int
+        n: int
         ) -> list:
-        
-        from myhda_ur.dynamic_models.selector import get_timepoint_cells as _get_timepoint_cells
+        """Wrapper method to call get_timepoint_cells() from HDAData object.
+    
+        """
+        from ..dynamic_models.selector import get_timepoint_cells as _get_timepoint_cells
         return _get_timepoint_cells(
-            input=self,
-            n_samples_per_timepoint=n_samples_per_timepoint
+            data=self,
+            n=n
             )
         
         
@@ -442,10 +448,12 @@ class HDAData:
         self,
         n: int
         ) -> list:
-
-        from myhda_ur.dynamic_models.selector import get_highly_dynamic_trajectories as _get_highly_dynamic_trajectories
+        """Wrapper method to call get_highly_dynamic_trajectories() from HDAData object.
+    
+        """
+        from ..dynamic_models.selector import get_highly_dynamic_trajectories as _get_highly_dynamic_trajectories
         return _get_highly_dynamic_trajectories(
-            input=self,
+            data=self,
             n=n
             )
     

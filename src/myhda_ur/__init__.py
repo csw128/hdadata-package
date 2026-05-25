@@ -1,10 +1,15 @@
-from .load import read_mtx, read_tsv, read_csv, load_files
+from .load import Loader
 from .structure import HDAData
+from .dynamic_models import compute_similarity, get_highly_variable_genes, get_timepoint_cells, get_highly_dynamic_trajectories
+from .visualize import plot_heatmap
+
 
 __all__ = [
-    "read_mtx",
-    "read_tsv",
-    "read_csv",
-    "load_files",
+    "Loader",
     "HDAData",
+    "compute_similarity", 
+    "get_highly_variable_genes",
+    "get_timepoint_cells",
+    "get_highly_dynamic_trajectories",
+    "plot_heatmap"
 ]

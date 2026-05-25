@@ -11,7 +11,21 @@ def plot_heatmap(
     type: str = None,
     cluster: bool = False
     ) -> go.Figure:
-
+    """Plot similarity heatmap with or without clustered dendograms using plotly.
+    
+    Args:
+        sim: 
+            dataframe with labels and similarity matrix values
+        type: "gene" / "cell" / "trajectories"
+            heatmap type of similarity to be used to plot title
+        cluster: True / False
+            True  = clustered heatmap with dendograms
+            False = regular heatmap without cluster
+            
+    Returns:
+        Interactive similarity heatmap
+        
+    """
     labels = list(sim.index)
     n = len(labels)
 

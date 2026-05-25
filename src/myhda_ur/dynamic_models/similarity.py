@@ -1,8 +1,9 @@
-from structure.object import HDAData
-from dynamic_models.distance import _calc_correlation, _calc_cosine
-from dynamic_models.representation import _get_vectors
+from ..structure.object import HDAData
+from ..dynamic_models.distance import _calc_correlation, _calc_cosine
+from ..dynamic_models.representation import _get_vectors
 import numpy as np
 import pandas as pd
+from collections.abc import Callable
 
 
 metrics = {
@@ -13,9 +14,20 @@ metrics = {
 
 def _pairwise_similarity(
     vectors: np.ndarray,
-    metric
+    metric: Callable[[np.ndarray, np.ndarray], float]
     ) -> np.ndarray:
+    """Compute pairwise similarity matrix based on chosen distance metric.
     
+    Args:
+        vectors: 
+            vectors to compare distances
+        metric: _calc_correlation / _calc_cosine
+            distance function to be called 
+    
+    Returns:
+        pairwise similarity matrix with the same pairs having highest similarity of 1.0 on the diagonal.
+        
+    """
     n = vectors.shape[0]
     similarity = np.zeros((n, n), dtype=float)
 
@@ -32,7 +44,7 @@ def _pairwise_similarity(
 
 
 def compute_similarity(
-    input: HDAData,
+    data: HDAData,
     target: HDAData,
     key: str = None,
     kind: str = None,
@@ -40,18 +52,27 @@ def compute_similarity(
     method: str = None,
     name: str = None
     ) -> HDAData:
-    """Compute similarity matrix.
+    """Helper function to build vectors and labels into similarity matrix, and feeds the result 
+       back into the original data structure.
     
-        Args:
-            input: subset of original matrix such as X or ntr to be analyzed
-            target: store result back to object itself (only for internal use by wrapper)
-            key: the data from the subset to analyze (e.g "X" or "ntr" or "mean_ntr)
-            kind: gene / cell / trajectory similarity ("gene" or "cell" or "trajectory")
-            method: metric method ("correlation" or "cosine")
-            name: name of similarity matrix to store
-       
-        Returns:
-            target object with new similarity matrix
+    Args:
+        data: 
+            subset of original matrix such as X or ntr to be analyzed
+        target: 
+            location to store result - only for internal use by wrapper
+        key: "X" / "ntr" / "mean_ntr"
+            data from the subset to analyze 
+        kind: "gene" / "cell" / "trajectory"
+            type of similarity 
+        trajectory_id: 
+            selected trajectories to analyze
+        method: "correlation" / "cosine"
+            distance metric
+        name:
+            user-defined similarity matrix name for storage
+    
+    Returns:
+        object with similarity matrix stored 
             
     """
     # validate metric
@@ -62,7 +83,7 @@ def compute_similarity(
 
     # build vectors
     vectors, labels = _get_vectors(
-                            input=input,
+                            data=data,
                             key=key,
                             kind=kind,
                             trajectory_id=trajectory_id

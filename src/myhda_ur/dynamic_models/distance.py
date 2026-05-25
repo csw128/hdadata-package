@@ -7,21 +7,28 @@ def _calc_correlation(
     y: np.ndarray
     ) -> float:
     """Compute correlation distance between 2 vectors.
+        scipy.spatial.distance.correlation(x, y) returns distance in [0, 2] where
+            0 = perfect positive correlation
+            1 = no correlation 
+            2 = anti-correlation
+        
+        Similarity is computed as (1 - distance).
     
         Args:
             x: vector 1
             y: vector 2
         
         Returns:
-            similarity in range [-1, 1]
-                - 1 = most similar  
-                - -1 = most dissimilar 
+            similarity in range [-1, 1] where
+                1  = most similar  
+                -1 = most dissimilar 
                 
     """
     # avoid NaN for zero vector
     if np.std(x) == 0 or np.std(y) == 0:   
         return 0.0
-    sim = 1 - correlation(x, y)   # correlation in [0, 2], sim in [-1, 1]
+    sim = 1 - correlation(x, y)  
+    
     return sim
 
 
@@ -30,13 +37,19 @@ def _calc_cosine(
     y: np.ndarray
     ) -> float:
     """Compute cosine distance between 2 vectors.
+        scipy.spatial.distance.cosine(x, y) returns distance in [0, 2] where
+            0 = vectors in same direction (0°)
+            1 = orthogonal vectors (90°)
+            2 = vectors in opposite direction (180°)
+        
+        Similarity is computed as (1 - distance).
     
         Args:
             x: vector 1
             y: vector 2
         
         Returns:
-            similarity in range [0, 1]
+            similarity in range [-1, 1] where
                 - 1 = most similar 
                 - -1 = most dissimilar
                 
@@ -44,7 +57,8 @@ def _calc_cosine(
     # avoid NaN for zero vector
     if np.linalg.norm(x) == 0 or np.linalg.norm(y) == 0:   
         return 0.0
-    sim = 1 - cosine(x, y)      # cosine in [0, 2], sim in [-1, 1]
+    sim = 1 - cosine(x, y)    
+    
     return sim
 
 
@@ -67,4 +81,5 @@ def _normalize_c(
     lib = vectors.sum(axis=1, keepdims=True) 
     # avoid NaN for zero vector
     lib = np.where(lib == 0, 1, lib)
+    
     return np.log1p(vectors / lib * scale)
