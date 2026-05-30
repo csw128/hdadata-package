@@ -9,7 +9,8 @@ from scipy.spatial.distance import squareform
 def plot_heatmap(
     sim: pd.DataFrame,
     type: str = None,
-    cluster: bool = False
+    cluster: bool = False,
+    title: str = None
     ) -> go.Figure:
     """Plot similarity heatmap with or without clustered dendograms using plotly.
     
@@ -21,6 +22,8 @@ def plot_heatmap(
         cluster: True / False
             True  = clustered heatmap with dendograms
             False = regular heatmap without cluster
+        title: 
+            user-specificed title of the plot
             
     Returns:
         Interactive similarity heatmap
@@ -125,8 +128,11 @@ def plot_heatmap(
         fig.update_xaxes(tickangle=45)
         fig.update_yaxes(autorange="reversed")
 
+    if title is None:
+        title = f"{type} vs {type} similarity"
+
     fig.update_layout(
-        title=f"{type} vs {type} similarity",
+        title=title,
         plot_bgcolor="white",
         paper_bgcolor="white",
         width=int(total_w),
