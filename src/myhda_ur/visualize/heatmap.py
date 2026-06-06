@@ -15,8 +15,8 @@ def plot_heatmap(
     """Plot similarity heatmap with or without clustered dendograms using plotly.
     
     Args:
-        sim: 
-            dataframe with labels and similarity matrix values
+        sim_name: 
+            similarity dataframe stored
         type: "gene" / "cell" / "trajectories"
             heatmap type of similarity to be used to plot title
         cluster: True / False

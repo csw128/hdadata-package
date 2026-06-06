@@ -1,15 +1,13 @@
 from .load import Loader
 from .structure import HDAData
-from .dynamic_models import compute_similarity, get_highly_variable_genes, get_timepoint_cells, get_highly_dynamic_trajectories
-from .visualize import plot_heatmap
+from . import visualize
+# from .visualize import plot_heatmap, plot_line, plot_scatter
 
+def load_scifate():
+    loader = Loader()
+    return loader.load_as_hda()
 
 __all__ = [
     "Loader",
-    "HDAData",
-    "compute_similarity", 
-    "get_highly_variable_genes",
-    "get_timepoint_cells",
-    "get_highly_dynamic_trajectories",
-    "plot_heatmap"
+    "HDAData"
 ]

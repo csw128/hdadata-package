@@ -49,8 +49,7 @@ def compute_similarity(
     key: str = None,
     kind: str = None,
     trajectory_id: list = None,
-    method: str = None,
-    name: str = None
+    method: str = None
     ) -> HDAData:
     """Helper function to build vectors and labels into similarity matrix, and feeds the result 
        back into the original data structure.
@@ -68,8 +67,6 @@ def compute_similarity(
             selected trajectories to analyze
         method: "correlation" / "cosine"
             distance metric
-        name:
-            user-defined similarity matrix name for storage
     
     Returns:
         object with similarity matrix stored 
@@ -102,9 +99,8 @@ def compute_similarity(
                     )
 
     # store result
-    if name is None:
-        name = f"{kind}_{method}_{key}"
-
+    name = f"{method}_{key}_{kind}"
     target.similarities[name] = similarity_df
+    print(f'Similarity "{name}" stored! \n')
 
     return target

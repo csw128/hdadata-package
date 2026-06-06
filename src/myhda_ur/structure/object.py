@@ -11,6 +11,7 @@ class HDAData:
         var: Optional[pd.DataFrame] = None, 
         layers: Optional[Dict[str, sp.csr_matrix]] = None, 
         similarities: Optional[Dict[str, pd.DataFrame]] = None,
+        clusters: Optional[Dict[str, pd.Series]] = None,
         trajectories: Optional[pd.DataFrame] = None
         ) -> None:
         
@@ -30,6 +31,7 @@ class HDAData:
         self.var = self._set_var_idx(var)                  
         self.layers = layers or {}   
         self.similarities = similarities or {}   
+        self.clusters = clusters or {}
         self.trajectories = trajectories   
 
         self._validate()
@@ -162,6 +164,7 @@ class HDAData:
             f"  X shape: {self.X.shape}\n"
             f"  layers: {list(self.layers.keys())}\n"
             f"  similarities: {list(self.similarities.keys())}\n"
+            f"  clusters: {list(self.clusters.keys())}\n"
             f"  trajectories: {'Yes' if self.trajectories is not None else 'No'}"
         )
         
@@ -398,8 +401,7 @@ class HDAData:
         key: str,
         kind: str,
         trajectory_id: list = None,
-        method: str = None,
-        name: str = None
+        method: str = None
         ):
         """Wrapper method to call compute_similarity() from HDAData object.
      
@@ -411,8 +413,7 @@ class HDAData:
             key=key,
             kind=kind,
             trajectory_id=trajectory_id,
-            method=method,
-            name=name
+            method=method
         )
 
 
@@ -457,3 +458,45 @@ class HDAData:
             n=n
             )
     
+    
+    def find_kmeans_k(
+        self,
+        data,
+        key: str,
+        kind: str,
+        trajectory_id: list = None,
+        max_clusters: int = 6
+        ) -> None:
+        """Wrapper method to call find_kmeans_k() from HDAData object.
+    
+        """
+        from ..clustering.kmeans import find_kmeans_k as _find_kmeans_k
+        return _find_kmeans_k(
+            data=data,
+            key=key,
+            kind=kind,
+            trajectory_id=trajectory_id,
+            max_clusters=max_clusters
+            )
+        
+    
+    def cluster_kmeans(
+        self,
+        data,
+        key: str,
+        kind: str,
+        trajectory_id: list = None,
+        k: int = 3
+        ):
+        """Wrapper method to call compute_kmeans() from HDAData object.
+    
+        """
+        from ..clustering.kmeans import cluster_kmeans as _cluster_kmeans
+        return _cluster_kmeans(
+            data=data,
+            target=self,
+            key=key,
+            kind=kind,
+            trajectory_id=trajectory_id,
+            k=k
+            )

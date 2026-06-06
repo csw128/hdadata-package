@@ -1,3 +1,10 @@
-from .plot import plot_heatmap
+from .heatmap import plot_heatmap as heatmap
+from .lines import plot_line as line
+from .scatter import plot_scatter as scatter
 
-__all__ = ["plot_heatmap"]
+
+__all__ = [
+    "heatmap",
+    "line",      
+    "scatter"
+    ]
