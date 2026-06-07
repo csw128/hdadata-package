@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from scipy.cluster.hierarchy import linkage, dendrogram
-from scipy.spatial.distance import squareform
+from scipy.cluster.hierarchy import dendrogram
+from ..clustering.hierarchical import _get_linkage
 
 
 def plot_heatmap(
@@ -60,12 +60,8 @@ def plot_heatmap(
     heatmap_frac = heatmap_px / (dendro_px + heatmap_px)
 
     if cluster:
-        dist = np.clip(1 - sim.values, 0, None)
-        np.fill_diagonal(dist, 0)
-        condensed = squareform(dist, checks=False)
-
         # hierarchical clustering
-        Z = linkage(condensed, method="ward")
+        Z, _ = _get_linkage(sim)
         dendro_info = dendrogram(Z, labels=labels, no_plot=True)
         order = dendro_info["leaves"]
         ordered_labels = [labels[i] for i in order]

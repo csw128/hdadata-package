@@ -483,12 +483,12 @@ class HDAData:
     def cluster_kmeans(
         self,
         data,
-        key: str,
-        kind: str,
+        key: str = None,
+        kind: str = None,
         trajectory_id: list = None,
         k: int = 3
         ):
-        """Wrapper method to call compute_kmeans() from HDAData object.
+        """Wrapper method to call cluster_kmeans() from HDAData object.
     
         """
         from ..clustering.kmeans import cluster_kmeans as _cluster_kmeans
@@ -499,4 +499,24 @@ class HDAData:
             kind=kind,
             trajectory_id=trajectory_id,
             k=k
+            )
+        
+        
+    def cluster_hierarchical(  
+        self,
+        sim: pd.DataFrame,  
+        kind: str = None,
+        k: int = None,
+        t: float = None
+        ):
+        """Wrapper method to call cluster_hierarchical() from HDAData object.
+    
+        """
+        from ..clustering.hierarchical import cluster_hierarchical as _cluster_hierarchical
+        return _cluster_hierarchical(
+            target=self,
+            sim=sim,
+            kind=kind,
+            k=k,
+            t=t
             )

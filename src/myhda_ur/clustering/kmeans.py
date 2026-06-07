@@ -40,8 +40,8 @@ def find_kmeans_k(
 def cluster_kmeans(
     data: HDAData,
     target: HDAData,
-    key: str,
-    kind: str,
+    key: str = None,
+    kind: str = None,
     trajectory_id: list = None,
     k: int = 3
     ):
