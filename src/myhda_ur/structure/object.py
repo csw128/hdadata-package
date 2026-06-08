@@ -520,3 +520,21 @@ class HDAData:
             k=k,
             t=t
             )
+        
+        
+    def cluster_spectral(  
+        self,
+        sim: pd.DataFrame,  
+        kind: str = None,
+        k: int = None
+        ):
+        """Wrapper method to call cluster_spectral() from HDAData object.
+    
+        """
+        from ..clustering.spectral import cluster_spectral as _cluster_spectral
+        return _cluster_spectral(
+            target=self,
+            sim=sim,
+            kind=kind,
+            k=k
+            )

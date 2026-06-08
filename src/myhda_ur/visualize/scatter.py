@@ -12,14 +12,19 @@ def plot_scatter(
     key: str = None,
     kind: str = None,
     trajectory_id: list = None,
-    sim: pd.DataFrame = None,
-    reduction: str = None
+    sim: pd.DataFrame = None
     ) -> None:
     
     labels = cluster.index.tolist()
     cluster_labels = cluster.values
     
-    if reduction == "pca":
+    # MDS for hierarchical & graph-based 
+    if sim is not None:
+        coords, xlabel, ylabel = reduce_mds(sim)
+        title = f'{cluster.name} - MDS projection'
+    
+    # PCA for kmeans
+    else:
         vectors, _ = _get_vectors(
                             data=data,
                             key=key,
@@ -28,14 +33,7 @@ def plot_scatter(
                         )
         
         coords, xlabel, ylabel = reduce_pca(vectors)
-        title = f'KMeans through PCA projection'
-    
-    elif reduction == "mds":
-        coords, xlabel, ylabel = reduce_mds(sim)
-        title = f'Hierarchical clustering through MDS projection'
-    
-    else:
-        raise ValueError("Please specify the reduction type: 'pca' or 'mds'!")
+        title = f'{cluster.name} - PCA projection'
         
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.scatter(
@@ -51,4 +49,3 @@ def plot_scatter(
     ax.set_title(title)
     plt.tight_layout()
     plt.show()
-    

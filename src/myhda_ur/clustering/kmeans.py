@@ -30,6 +30,7 @@ def find_kmeans_k(
         kmeans.fit(vectors)
         inertias.append(kmeans.inertia_)
 
+    plt.figure(figsize=(6, 4))
     plt.plot(range(2, max_clusters), inertias, marker='o')
     plt.title('Inertia vs k clusters')
     plt.xlabel('Number of clusters')
@@ -53,10 +54,15 @@ def cluster_kmeans(
                         trajectory_id=trajectory_id
                     )
     
-    kmeans = KMeans(n_clusters=k, init='k-means++', n_init='auto', random_state=0)
+    kmeans = KMeans(
+                n_clusters=k, 
+                init='k-means++', 
+                n_init='auto', 
+                random_state=0
+                )
     kmeans.fit(vectors)
     
-    name = f"kmeans_k{k}_{key}_{kind}"
+    name = f"kmeans_k{k}_{kind}"
     
     cl = pd.Series(
             kmeans.labels_,
@@ -67,7 +73,5 @@ def cluster_kmeans(
     # store result
     target.clusters[name] = cl
     print(f'Cluster "{name}" stored! \n')
-    
-    print(f'Cluster results: \n{cl}\n')
     
     return target

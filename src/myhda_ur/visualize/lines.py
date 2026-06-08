@@ -18,12 +18,15 @@ def plot_line(
     
     k = len(np.unique(cluster_labels))
     
-    vectors, _ = _get_vectors(
+    vectors, vec_labels = _get_vectors(
                             data=data,
                             key=key,
                             kind=kind,
                             trajectory_id=trajectory_id
                         )
+    
+    # realign vector index
+    vectors = vectors[pd.Index(vec_labels).get_indexer(labels)]
     
     if kind == "trajectory":
         n_timepoints = len(data.trajectories.columns)

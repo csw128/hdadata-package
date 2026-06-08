@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import linkage
 from scipy.cluster.hierarchy import fcluster
 from scipy.spatial.distance import squareform
 from ..structure.object import HDAData
@@ -53,5 +53,5 @@ def cluster_hierarchical(
     # store result
     target.clusters[name] = cl
     print(f'Cluster "{name}" stored! \n')
-    
+
     return target
