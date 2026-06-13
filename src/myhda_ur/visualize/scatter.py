@@ -1,40 +1,32 @@
 from ..structure.object import HDAData
-from ..dynamic_models.representation import _get_vectors
-from ..reduction.pca import reduce_pca
-from ..reduction.mds import reduce_mds
 import matplotlib.pyplot as plt
 import pandas as pd
 
 
 def plot_scatter(
-    data: HDAData = None,
     cluster: pd.Series = None,           
-    key: str = None,
-    kind: str = None,
-    trajectory_id: list = None,
-    sim: pd.DataFrame = None
+    embedding: tuple = None,
+    reduction: str = None
     ) -> None:
+    """Plot scatter to visualize the clusters formed from the chosen clustering
+       algorithm in a reduced dimension.
     
+    Args:
+        cluster:
+            cluster result stored in HDAData.clusters
+        embedding:
+            embedding result stored in HDAData.embeddings
+        reduction: "PCA" / "MDS"
+            type of dimension reduction algorithm used
+            
+    """
     labels = cluster.index.tolist()
     cluster_labels = cluster.values
     
-    # MDS for hierarchical & graph-based 
-    if sim is not None:
-        coords, xlabel, ylabel = reduce_mds(sim)
-        title = f'{cluster.name} - MDS projection'
+    coords, xlabel, ylabel = embedding
     
-    # PCA for kmeans
-    else:
-        vectors, _ = _get_vectors(
-                            data=data,
-                            key=key,
-                            kind=kind,
-                            trajectory_id=trajectory_id
-                        )
-        
-        coords, xlabel, ylabel = reduce_pca(vectors)
-        title = f'{cluster.name} - PCA projection'
-        
+    title = f'{cluster.name} - {reduction} projection'
+      
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.scatter(
         coords[:, 0], coords[:, 1], 

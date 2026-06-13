@@ -1,7 +1,7 @@
-from .pca import reduce_pca as pca
-from .mds import reduce_mds as mds
+from .pca import reduce_PCA
+from .mds import reduce_MDS
 
 __all__ = [
-    "pca",
-    "mds"
+    "reduce_PCA",
+    "reduce_MDS"
     ]

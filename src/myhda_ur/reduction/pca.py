@@ -1,16 +1,54 @@
+from ..dynamic_models.representation import _get_vectors
+from ..structure.object import HDAData
 from sklearn.decomposition import PCA
 import numpy as np
 
-def reduce_pca(
-    vectors: np.ndarray
+
+def reduce_PCA(
+    data: HDAData,   
+    target: HDAData,
+    key: str = None,
+    kind: str = None,
+    trajectory_id: list = None,
     ) -> tuple[np.ndarray, str, str]:
-    """Dimensionality reduction of vectors to 2D using PCA.
+    """Dimensionality reduction using PCA on raw gene/cell/trajectory vectors.
     
+        Args:
+            data:
+                (subset) data object to analyze
+            target: 
+                location to store result - only for internal use by wrapper
+            key: "X" / "ntr"
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements 
+            trajectory_id: 
+                selected trajectories to analyze
+        
+        Return:
+            tuple:
+                - x, y coordinates in reduced 2D PCA
+                - xlabel: PCA1
+                - ylabel: PCA2
+                
     """
+    vectors, _ = _get_vectors(
+                        data=data,
+                        key=key,
+                        kind=kind,
+                        trajectory_id=trajectory_id
+                    )
+    
     pca = PCA(n_components=2)
     coords = pca.fit_transform(vectors)
-    xlabel = f"PC1 ({pca.explained_variance_ratio_[0]:.0%} var)"
-    ylabel = f"PC2 ({pca.explained_variance_ratio_[1]:.0%} var)"
+    xlabel, ylabel = "PC1", "PC2"
     
-    return coords, xlabel, ylabel
+    em = (coords, xlabel, ylabel)
+    
+    name = f"pca_{kind}"
+     
+    # store result
+    target.embeddings[name] = em
+    print(f'PCA embedding "{name}" stored! \n')
 
+    return target

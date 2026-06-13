@@ -15,7 +15,24 @@ def find_kmeans_k(
     trajectory_id: list = None,
     max_clusters: int = 6
     ) -> None:
-
+    """Plot inertia vs k to find the optimal k for KMeans using the Elbow Method.
+        
+        Args:
+            data: 
+                (subset) data object to analyze
+            key: "X" / "ntr" 
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements
+            trajectory_id: 
+                selected trajectories to analyze
+            max_clusters:
+                maximum number of clusters to form
+    
+        Returns:
+           Line plot of intertia vs k
+                
+    """
     vectors, _ = _get_vectors(
                             data=data,
                             key=key,
@@ -45,8 +62,31 @@ def cluster_kmeans(
     kind: str = None,
     trajectory_id: list = None,
     k: int = 3
-    ):
-
+    ) -> HDAData:
+    """KMeans clustering on gene/cell/trajectory vectors.
+    
+       Since KMeans does not work directly on the pre-computed similarity/distance matrix, 
+       but it operates on the raw feature space, it requires the raw vectors first to 
+       compute its own internal euclidean distance for clustering.
+        
+        Args:
+            data: 
+                (subset) data object to analyze
+            target: 
+                location to store result - only for internal use by wrapper
+            key: "X" / "ntr" 
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements
+            trajectory_id: 
+                selected trajectories to analyze
+            k:
+                number of clusters
+    
+        Returns:
+           object with cluster labels stored 
+                
+    """
     vectors, labels = _get_vectors(
                         data=data,
                         key=key,

@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.cluster import SpectralClustering
-from scipy.spatial.distance import squareform
 from ..structure.object import HDAData
 
 
@@ -11,8 +10,26 @@ def cluster_spectral(
     kind: str = None,
     k: int = None
     ) -> HDAData:
-    """Spectral (graph-based) clustering
+    """Spectral (graph-based) clustering on similarity matrix.
     
+       Spectral clustering accepts a precomputed affinity matrix. The stored similarity
+       matrix is treated as the affinity graph by first clipping the values to zero to 
+       ensure non-negative edge weights. It is then transformed into a Laplacian matrix
+       for clustering.
+       
+       Args:
+            target: 
+                location to store result - only for internal use by wrapper
+            sim: 
+                similarity dataframe stored
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements
+            k:
+                number of clusters
+
+        Returns:
+            object with cluster labels stored 
+            
     """
     labels = list(sim.index)
     affinity = np.clip(sim.values, 0, None)

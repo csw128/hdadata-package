@@ -12,6 +12,7 @@ class HDAData:
         layers: Optional[Dict[str, sp.csr_matrix]] = None, 
         similarities: Optional[Dict[str, pd.DataFrame]] = None,
         clusters: Optional[Dict[str, pd.Series]] = None,
+        embeddings: Optional[Dict[str, tuple]] = None,
         trajectories: Optional[pd.DataFrame] = None
         ) -> None:
         
@@ -23,6 +24,8 @@ class HDAData:
             var:            gene metadata (features) 
             layers:         additional matrices (e.g layers["ntr"] (new RNA))
             similarities:   similarity matrices (e.g gene-gene matrix)
+            clusters:       clustered labels 
+            embeddings:     coordinates in reduced dimensions and x-y axis labels
             trajectories:   dynamics over time
         
         """
@@ -32,6 +35,7 @@ class HDAData:
         self.layers = layers or {}   
         self.similarities = similarities or {}   
         self.clusters = clusters or {}
+        self.embeddings = embeddings or {}
         self.trajectories = trajectories   
 
         self._validate()
@@ -165,6 +169,7 @@ class HDAData:
             f"  layers: {list(self.layers.keys())}\n"
             f"  similarities: {list(self.similarities.keys())}\n"
             f"  clusters: {list(self.clusters.keys())}\n"
+            f"  embeddings: {list(self.embeddings.keys())}\n"
             f"  trajectories: {'Yes' if self.trajectories is not None else 'No'}"
         )
         
@@ -537,4 +542,40 @@ class HDAData:
             sim=sim,
             kind=kind,
             k=k
+            )
+        
+    
+    def reduce_PCA(  
+        self,
+        data,   
+        key: str = None,
+        kind: str = None,
+        trajectory_id: list = None,
+        ):
+        """Wrapper method to call reduce_PCA() from HDAData object.
+    
+        """
+        from ..reduction.pca import reduce_PCA as _reduce_PCA
+        return _reduce_PCA(
+            data=data,   
+            target=self,
+            key=key,
+            kind=kind,
+            trajectory_id=trajectory_id,
+            )
+    
+    
+    def reduce_MDS(  
+        self,
+        sim: pd.DataFrame,
+        kind: str = None
+        ):
+        """Wrapper method to call reduce_MDS() from HDAData object.
+    
+        """
+        from ..reduction.mds import reduce_MDS as _reduce_MDS
+        return _reduce_MDS(
+            target=self,
+            sim=sim,
+            kind=kind
             )

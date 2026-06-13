@@ -12,10 +12,10 @@ def plot_heatmap(
     cluster: bool = False,
     title: str = None
     ) -> go.Figure:
-    """Plot similarity heatmap with or without clustered dendograms using plotly.
+    """Plot similarity heatmap with or without clustered dendograms
     
     Args:
-        sim_name: 
+        sim: 
             similarity dataframe stored
         type: "gene" / "cell" / "trajectories"
             heatmap type of similarity to be used to plot title

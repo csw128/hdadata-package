@@ -12,7 +12,23 @@ def plot_line(
     kind: str = None,
     trajectory_id: list = None
     ) -> None:
-
+    """Plot line graphs to visualize:
+        - (in subplots) the elements in each cluster and its mean 
+        - the mean of each cluster in a single plot
+    
+    Args:
+        data:
+            (subset) data object to analyze
+        cluster:
+            cluster result stored in HData.clusters
+        key: "X" / "ntr"
+            values to compute on 
+        kind: "gene" / "cell" / "trajectory"
+            type of cluster elements
+        trajectory_id: 
+            selected trajectories to analyze
+        
+    """
     labels = cluster.index.tolist()
     cluster_labels = cluster.values
     

@@ -56,10 +56,10 @@ def compute_similarity(
     
     Args:
         data: 
-            subset of original matrix such as X or ntr to be analyzed
+            (subset) data object to analyze
         target: 
             location to store result - only for internal use by wrapper
-        key: "X" / "ntr" / "mean_ntr"
+        key: "X" / "ntr" 
             data from the subset to analyze 
         kind: "gene" / "cell" / "trajectory"
             type of similarity 

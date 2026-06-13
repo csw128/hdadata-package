@@ -4,33 +4,33 @@ import numpy as np
 import scipy.sparse as sp
 
 
-def _build_mean_ntr_matrix(
-    data: HDAData
-    ) -> np.ndarray:
-    """For each timepoint, compute the mean NTR across all cells assigned to that timepoint, yielding one value per gene. 
+# def _build_mean_ntr_matrix(
+#     data: HDAData
+#     ) -> np.ndarray:
+#     """For each timepoint, compute the mean NTR across all cells assigned to that timepoint, yielding one value per gene. 
     
-    Args:
-        data:
-            data object
+#     Args:
+#         data:
+#             data object
     
-    Returns:
-        matrix of shape (genes x timepoints)
+#     Returns:
+#         matrix of shape (genes x timepoints)
         
-    """
-    ntr_hvg = data.layers["ntr"].toarray()
+#     """
+#     ntr_hvg = data.layers["ntr"].toarray()
     
-    trajectories = data.trajectories
-    timepoints = trajectories.columns.tolist()
+#     trajectories = data.trajectories
+#     timepoints = trajectories.columns.tolist()
     
-    mean_ntr_matrix = np.zeros((ntr_hvg.shape[0], len(timepoints)))
+#     mean_ntr_matrix = np.zeros((ntr_hvg.shape[0], len(timepoints)))
     
-    for col_idx, tp in enumerate(timepoints):
-        cells = trajectories[tp].tolist()
-        cell_indices = [data._cell_to_index[c] for c in cells]
-        # mean NTR across all cells in the trajectory time point for each HVG
-        mean_ntr_matrix[:, col_idx] = ntr_hvg[:, cell_indices].mean(axis=1)
+#     for col_idx, tp in enumerate(timepoints):
+#         cells = trajectories[tp].tolist()
+#         cell_indices = [data._cell_to_index[c] for c in cells]
+#         # mean NTR across all cells in the trajectory time point for each HVG
+#         mean_ntr_matrix[:, col_idx] = ntr_hvg[:, cell_indices].mean(axis=1)
 
-    return mean_ntr_matrix 
+#     return mean_ntr_matrix 
     
 
 def _get_gene_vectors(
@@ -40,9 +40,9 @@ def _get_gene_vectors(
     """Build gene vectors based on key.
     
     Args:
-        data:
-            data object
-        key: "X" / "ntr" / "mean_ntr"
+        data: 
+            (subset) data object to analyze
+        key: "X" / "ntr" 
             gene expression or NTR value to create vectors from
 
     Returns:
@@ -52,8 +52,8 @@ def _get_gene_vectors(
     if key == "X":
         dense = data.X.toarray()
         
-    elif key == "mean_ntr":
-        dense = _build_mean_ntr_matrix(data)
+    # elif key == "mean_ntr":
+    #     dense = _build_mean_ntr_matrix(data)
 
     elif key in data.layers:
         dense = data.layers[key].toarray()
@@ -73,7 +73,7 @@ def _get_cell_vectors(
     
     Args:
         data:
-            data object
+            (subset) data object to analyze
         key: "X" / "ntr" 
             gene expression or NTR value to create vectors from
         normalize: True / False
@@ -111,8 +111,8 @@ def _build_trajectory_matrix(
     All trajectory vectors are stacked row-wise.
 
     Args:
-        data:
-            data object
+        data: 
+            (subset) data object to analyze
         key: data.X / data.layers["ntr"]
             gene expression or NTR matrix
         trajectory_id:
@@ -155,8 +155,8 @@ def _get_trajectory_vectors(
     """Build trajectory vectors based on key.
     
     Args:
-        data:
-            data object
+        data: 
+            (subset) data object to analyze
         key: "X" / "ntr" 
             gene expression or NTR value to create vectors from
         trajectory_id:
@@ -195,9 +195,9 @@ def _get_vectors(
     """Helper to call the corresponding functions to create gene, cell or trajectory vectors.
     
     Args:
-        data:
-            data object
-        key: "X" / "ntr" / "mean_ntr"
+        data: 
+            (subset) data object to analyze
+        key: "X" / "ntr" 
             gene expression or NTR value to create vectors from
         kind: "gene" / "cell" / "trajectory"
             type of vectors to create
