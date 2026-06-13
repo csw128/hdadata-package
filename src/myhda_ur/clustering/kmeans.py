@@ -65,9 +65,8 @@ def cluster_kmeans(
     ) -> HDAData:
     """KMeans clustering on gene/cell/trajectory vectors.
     
-       Since KMeans does not work directly on the pre-computed similarity/distance matrix, 
-       but it operates on the raw feature space, it requires the raw vectors first to 
-       compute its own internal euclidean distance for clustering.
+       sklearn KMeans does not work directly on pre-computed similarity/distance matrix.
+       It requires the raw vectors to compute its own internal euclidean distance for clustering.
         
         Args:
             data: 

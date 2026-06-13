@@ -40,8 +40,8 @@ def cluster_hierarchical(
     ) -> HDAData:
     """Agglomerative hierarchical clustering on similarity matrix.
 
-       Agglomerative clustering accepts a precomputed distance matrix directly,
-       so the stored similarity matrix is first converted back to a distance matrix
+       scipy agglomerative clustering accepts a precomputed distance matrix.
+       The stored similarity matrix is first converted back to a distance matrix
        then into a linkage matrix. The clusters are formed using either a distance
        threshold t or fixed k clusters.
        

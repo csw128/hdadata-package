@@ -12,10 +12,10 @@ def cluster_spectral(
     ) -> HDAData:
     """Spectral (graph-based) clustering on similarity matrix.
     
-       Spectral clustering accepts a precomputed affinity matrix. The stored similarity
-       matrix is treated as the affinity graph by first clipping the values to zero to 
-       ensure non-negative edge weights. It is then transformed into a Laplacian matrix
-       for clustering.
+       sklearn SpectralClustering accepts a precomputed affinity matrix. 
+       The stored similarity matrix is treated as the affinity graph by clipping the values 
+       to zero to ensure non-negative edge weights. Spectral clustering is then applied to 
+       group elements based on their connectivity.
        
        Args:
             target: 
