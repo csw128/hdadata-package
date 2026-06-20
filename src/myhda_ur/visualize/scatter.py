@@ -6,7 +6,8 @@ import pandas as pd
 def plot_scatter(
     cluster: pd.Series = None,           
     embedding: tuple = None,
-    reduction: str = None
+    reduction: str = None,
+    show_label: bool = False
     ) -> None:
     """Plot scatter to visualize the clusters formed from the chosen clustering
        algorithm in a reduced dimension.
@@ -18,6 +19,8 @@ def plot_scatter(
             embedding result stored in HDAData.embeddings
         reduction: "PCA" / "MDS"
             type of dimension reduction algorithm used
+        show_label: True / False
+            display the gene / cell / traj label next to the data point
             
     """
     labels = cluster.index.tolist()
@@ -33,8 +36,9 @@ def plot_scatter(
         c=cluster_labels, cmap="tab10"
         )
     
-    for i, name in enumerate(labels):
-        ax.annotate(name, coords[i], fontsize=7, ha="left")
+    if show_label:
+        for i, name in enumerate(labels):
+            ax.annotate(name, coords[i], fontsize=7, ha="left")
         
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)

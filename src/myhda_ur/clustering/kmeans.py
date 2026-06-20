@@ -42,13 +42,13 @@ def find_kmeans_k(
 
     inertias = []
 
-    for k in range(2, max_clusters):
+    for k in range(2, max_clusters + 1):
         kmeans = KMeans(n_clusters=k, init="k-means++", n_init="auto")
         kmeans.fit(vectors)
         inertias.append(kmeans.inertia_)
 
     plt.figure(figsize=(6, 4))
-    plt.plot(range(2, max_clusters), inertias, marker='o')
+    plt.plot(range(2, max_clusters + 1), inertias, marker='o')
     plt.title('Inertia vs k clusters')
     plt.xlabel('Number of clusters')
     plt.ylabel('Inertia')

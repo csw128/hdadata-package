@@ -10,7 +10,8 @@ def plot_line(
     cluster: pd.Series = None,            
     key: str = None,
     kind: str = None,
-    trajectory_id: list = None
+    trajectory_id: list = None,
+    gene_sym: str = None
     ) -> None:
     """Plot line graphs to visualize:
         - (in subplots) the elements in each cluster and its mean 
@@ -27,6 +28,8 @@ def plot_line(
             type of cluster elements
         trajectory_id: 
             selected trajectories to analyze
+        gene_sym:
+            gene to visualize. If None, plots mean across all genes
         
     """
     labels = cluster.index.tolist()
@@ -48,22 +51,35 @@ def plot_line(
         n_timepoints = len(data.trajectories.columns)
         n_genes = vectors.shape[1] // n_timepoints
 
-        # unflatten trajectory vector to get mean across gene
-        plot_vectors = vectors.reshape(len(labels), n_genes, n_timepoints).mean(axis=1)
+        # unflatten trajectory vector to (n_trajs, n_genes, n_timepoints)
+        unflattened = vectors.reshape(len(labels), n_genes, n_timepoints)
+        
+        if gene_sym is not None:
+            # map gene symbol to index pos in data.var.index
+            if gene_sym not in data.var.index:
+                raise ValueError(f"Gene '{gene_sym}' not found in data.var.index.")
+            gene_idx = data.var.index.get_loc(gene_sym)
+            # extract only the specific gene's values (n_trajs, n_timepoints)
+            plot_vectors = unflattened[:, gene_idx, :]
+            ylabel = f'{key}'
+        else:
+            # default: mean across all genes per trajectory
+            plot_vectors = unflattened.mean(axis=1)
+            ylabel = f'Mean {key} across genes'
+        
         xlabel = "Timepoint"
-        ylabel = f'Mean {key} across genes'
         timepoints = data.trajectories.columns
     
     elif kind == "gene":
         plot_vectors = vectors
         xlabel = "Cell index"
-        ylabel = f'{key} value'
+        ylabel = f'{key}'
         timepoints = None
 
     elif kind == "cell":
         plot_vectors = vectors
         xlabel = "Gene index"
-        ylabel = f'{key} value'
+        ylabel = f'{key}'
         timepoints = None
 
     fig, axes = plt.subplots(1, k + 1, figsize=(4 * (k + 1), 4), sharey=True)
@@ -109,6 +125,7 @@ def plot_line(
     ax_combined.set_xlabel(xlabel)
     ax_combined.legend(fontsize=7, loc="upper left")
 
-    plt.suptitle(f'Overview of Cluster Analysis', y=1.02)
+    sub_title = f' - gene {gene_sym}' if (gene_sym and kind == "trajectory") else ''
+    plt.suptitle(f'Overview of Cluster Analysis{sub_title}', y=1.02)
     plt.tight_layout()
     plt.show()

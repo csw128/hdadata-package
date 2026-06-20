@@ -9,7 +9,7 @@ from ..clustering.hierarchical import _get_linkage
 def plot_heatmap(
     sim: pd.DataFrame,
     type: str = None,
-    cluster: bool = False,
+    show_cluster: bool = False,
     title: str = None
     ) -> go.Figure:
     """Plot similarity heatmap with or without clustered dendograms
@@ -19,7 +19,7 @@ def plot_heatmap(
             similarity dataframe stored
         type: "gene" / "cell" / "trajectories"
             heatmap type of similarity to be used to plot title
-        cluster: True / False
+        show_cluster: True / False
             True  = clustered heatmap with dendograms
             False = regular heatmap without cluster
         title: 
@@ -49,7 +49,7 @@ def plot_heatmap(
     margin_bottom_x = MARGIN_BOTTOM + label_px   
 
     heatmap_px = n * CELL_PX
-    dendro_px  = DENDRO_PX if cluster else 0
+    dendro_px  = DENDRO_PX if show_cluster else 0
 
     # final figure size
     total_w = margin_left_y + heatmap_px + MARGIN_RIGHT
@@ -59,7 +59,7 @@ def plot_heatmap(
     dendro_frac  = dendro_px  / (dendro_px + heatmap_px)
     heatmap_frac = heatmap_px / (dendro_px + heatmap_px)
 
-    if cluster:
+    if show_cluster:
         # hierarchical clustering
         Z, _ = _get_linkage(sim)
         dendro_info = dendrogram(Z, labels=labels, no_plot=True)
