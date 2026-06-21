@@ -52,3 +52,41 @@ def reduce_PCA(
     print(f'PCA embedding "{name}" stored! \n')
 
     return target
+
+
+def compute_PCA(
+    data: HDAData,
+    target: HDAData,
+    key: str = None,
+    kind: str = None,
+    n_pc: int = None,
+    trajectory_id: list = None,
+    ) -> HDAData:
+    
+    vectors, _ = _get_vectors(
+                        data=data,
+                        key=key,
+                        kind=kind,
+                        trajectory_id=trajectory_id
+                    )
+    
+    pca = PCA(n_components=n_pc)
+    pca_matrix = pca.fit_transform(vectors)
+    
+    # store pc matrix 
+    target.layers["pca"] = pca_matrix
+    print(f'PCA matrix {key} x {n_pc} PCs stored in data.layers["pca"] \n')
+   
+    # store first 2 PCs coordinates for plotting 
+    coords = pca_matrix[:, :2]      
+    xlabel, ylabel = "PC1", "PC2"
+    
+    em = (coords, xlabel, ylabel)
+    
+    name = f"pca_{kind}_PC{n_pc}"
+     
+    # store result
+    target.embeddings[name] = em
+    print(f'PCA embedding "{name}" stored! \n')
+
+    return target

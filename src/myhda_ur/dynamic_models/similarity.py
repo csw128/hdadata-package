@@ -44,8 +44,8 @@ def _pairwise_similarity(
 
 
 def compute_similarity(
-    data: HDAData,
-    target: HDAData,
+    data: HDAData = None,
+    target: HDAData = None,
     key: str = None,
     kind: str = None,
     trajectory_id: list = None,
@@ -59,7 +59,7 @@ def compute_similarity(
             (subset) data object to analyze
         target: 
             location to store result - only for internal use by wrapper
-        key: "X" / "ntr" 
+        key: "X" / "ntr" / "pca"
             data from the subset to analyze 
         kind: "gene" / "cell" / "trajectory"
             type of similarity 
@@ -78,13 +78,25 @@ def compute_similarity(
 
     metric = metrics[method]
 
-    # build vectors
-    vectors, labels = _get_vectors(
-                            data=data,
-                            key=key,
-                            kind=kind,
-                            trajectory_id=trajectory_id
-                        )
+    # PCA case: when pre-computed pca matrix exist
+    if key == "pca":
+        if "pca" not in target.layers:
+            raise ValueError('PCA matrix not found in data.layers["pca"] '
+                             'Run compute_PCA first.')
+        vectors = target.layers["pca"]          
+        labels = data.obs.index.tolist()  
+        name = f"{method}_pca_cell"             
+
+    else:
+        # build vectors
+        vectors, labels = _get_vectors(
+                                data=data,
+                                key=key,
+                                kind=kind,
+                                trajectory_id=trajectory_id
+                            )
+        
+        name = f"{method}_{key}_{kind}"
 
     # compute similarity matrix
     similarity = _pairwise_similarity(
@@ -99,7 +111,6 @@ def compute_similarity(
                     )
 
     # store result
-    name = f"{method}_{key}_{kind}"
     target.similarities[name] = similarity_df
     print(f'Similarity "{name}" stored! \n')
 

@@ -43,7 +43,12 @@ def find_kmeans_k(
     inertias = []
 
     for k in range(2, max_clusters + 1):
-        kmeans = KMeans(n_clusters=k, init="k-means++", n_init="auto")
+        kmeans = KMeans(
+            n_clusters=k, 
+            init="k-means++", 
+            n_init="auto",
+            random_state=0
+            )
         kmeans.fit(vectors)
         inertias.append(kmeans.inertia_)
 

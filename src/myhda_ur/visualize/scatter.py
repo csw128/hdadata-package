@@ -1,4 +1,3 @@
-from ..structure.object import HDAData
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -6,7 +5,7 @@ import pandas as pd
 def plot_scatter(
     cluster: pd.Series = None,           
     embedding: tuple = None,
-    reduction: str = None,
+    title: str = None,
     show_label: bool = False
     ) -> None:
     """Plot scatter to visualize the clusters formed from the chosen clustering
@@ -17,8 +16,8 @@ def plot_scatter(
             cluster result stored in HDAData.clusters
         embedding:
             embedding result stored in HDAData.embeddings
-        reduction: "PCA" / "MDS"
-            type of dimension reduction algorithm used
+        title:
+            title of the plot
         show_label: True / False
             display the gene / cell / traj label next to the data point
             
@@ -28,9 +27,11 @@ def plot_scatter(
     
     coords, xlabel, ylabel = embedding
     
-    title = f'{cluster.name} - {reduction} projection'
+    if title is None:
+        title = f'Clustering on {cluster.name}'
       
     fig, ax = plt.subplots(figsize=(6, 5))
+        
     ax.scatter(
         coords[:, 0], coords[:, 1], 
         c=cluster_labels, cmap="tab10"

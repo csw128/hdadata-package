@@ -23,6 +23,9 @@ def _get_gene_vectors(
     if key == "X":
         dense = data.X.toarray()
     
+    elif key == "pca":
+        raise ValueError('key="pca" is not valid for kind="gene". Only valid for kind="cell".')
+    
     elif key in data.layers:
         dense = data.layers[key].toarray()
 

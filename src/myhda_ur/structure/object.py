@@ -402,9 +402,9 @@ class HDAData:
     
     def compute_similarity(
         self,
-        data,
-        key: str,
-        kind: str,
+        data = None,
+        key: str = None,
+        kind: str = None,
         trajectory_id: list = None,
         method: str = None
         ):
@@ -578,4 +578,25 @@ class HDAData:
             target=self,
             sim=sim,
             kind=kind
+            )
+    
+    def compute_PCA(  
+        self,
+        data,   
+        key: str = None,
+        kind: str = None,
+        n_pc: int = None,
+        trajectory_id: list = None,
+        ):
+        """Wrapper method to call compute_PCA() from HDAData object.
+    
+        """
+        from ..reduction.pca import compute_PCA as _compute_PCA
+        return _compute_PCA(
+            data=data,   
+            target=self,
+            key=key,
+            kind=kind,
+            n_pc=n_pc,
+            trajectory_id=trajectory_id,
             )
