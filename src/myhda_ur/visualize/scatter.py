@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import pandas as pd
 
 
@@ -29,14 +30,22 @@ def plot_scatter(
     
     if title is None:
         title = f'Clustering on {cluster.name}'
-      
-    fig, ax = plt.subplots(figsize=(6, 5))
         
-    ax.scatter(
-        coords[:, 0], coords[:, 1], 
-        c=cluster_labels, cmap="tab10"
-        )
+    cmap = plt.get_cmap("Paired")
+    norm = mpl.colors.Normalize(vmin=0, vmax=9)          
+    unique_labels = sorted(set(cluster_labels))
+    color_map = {label: cmap(norm(label)) for label in unique_labels}
+      
+    fig, ax = plt.subplots(figsize=(8, 6))
     
+    for label in unique_labels:
+        mask = cluster_labels == label
+        ax.scatter(
+            coords[mask, 0], coords[mask, 1],
+            color=color_map[label],
+            label=str(label)
+        )
+
     if show_label:
         for i, name in enumerate(labels):
             ax.annotate(name, coords[i], fontsize=7, ha="left")
@@ -44,5 +53,14 @@ def plot_scatter(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
+    
+    ax.legend(
+        title="Cluster",
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        borderaxespad=0,
+        frameon=True
+    )
+    
     plt.tight_layout()
     plt.show()

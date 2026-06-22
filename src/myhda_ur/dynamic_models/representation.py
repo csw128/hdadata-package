@@ -168,7 +168,7 @@ def _get_vectors(
     Args:
         data: 
             (subset) data object to analyze
-        key: "X" / "ntr" 
+        key: "X" / "ntr" / "new_rna"
             gene expression or NTR value to create vectors from
         kind: "gene" / "cell" / "trajectory"
             type of vectors to create
@@ -186,7 +186,7 @@ def _get_vectors(
 
     elif kind == "cell":
 
-        normalize = (key == "X")
+        normalize = (key != "ntr")
         vectors = _get_cell_vectors(data, key, normalize)
         labels = data.obs.index.tolist()
         
