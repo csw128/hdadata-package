@@ -39,7 +39,11 @@ def reduce_PCA(
                         trajectory_id=trajectory_id
                     )
     
-    pca = PCA(n_components=2)
+    pca = PCA(
+            n_components=2, 
+            random_state=0
+            )
+    
     coords = pca.fit_transform(vectors)
     xlabel, ylabel = "PC1", "PC2"
     
@@ -70,23 +74,27 @@ def compute_PCA(
                         trajectory_id=trajectory_id
                     )
     
-    pca = PCA(n_components=n_pc)
+    pca = PCA(
+            n_components=n_pc,
+            random_state=0
+            )
+        
     pca_matrix = pca.fit_transform(vectors)
     
     # store pc matrix 
     target.layers["pca"] = pca_matrix
     print(f'PCA matrix {key} x {n_pc} PCs stored in data.layers["pca"] \n')
    
-    # store first 2 PCs coordinates for plotting 
-    coords = pca_matrix[:, :2]      
-    xlabel, ylabel = "PC1", "PC2"
+    # # store first 2 PCs coordinates for plotting 
+    # coords = pca_matrix[:, :2]      
+    # xlabel, ylabel = "PC1", "PC2"
     
-    em = (coords, xlabel, ylabel)
+    # em = (coords, xlabel, ylabel)
     
-    name = f"pca_{kind}_PC{n_pc}"
+    # name = f"pca_{kind}_PC{n_pc}"
      
-    # store result
-    target.embeddings[name] = em
-    print(f'PCA embedding "{name}" stored! \n')
+    # # store result
+    # target.embeddings[name] = em
+    # print(f'PCA embedding "{name}" stored! \n')
 
     return target

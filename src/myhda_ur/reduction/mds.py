@@ -30,10 +30,10 @@ def reduce_MDS(
     np.fill_diagonal(dist, 0)
     
     mds = MDS(
-        n_components=2, 
-        dissimilarity="precomputed", 
-        random_state=0
-    )
+            n_components=2, 
+            dissimilarity="precomputed", 
+            random_state=0
+            )
     
     coords = mds.fit_transform(dist)
     xlabel, ylabel = "MDS1", "MDS2"

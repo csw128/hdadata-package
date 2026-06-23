@@ -600,3 +600,24 @@ class HDAData:
             n_pc=n_pc,
             trajectory_id=trajectory_id,
             )
+    
+    def reduce_UMAP(  
+        self,
+        data = None,  
+        key: str = None,
+        kind: str = None,
+        trajectory_id: list = None,
+        id: str = None
+        ):
+        """Wrapper method to call reduce_UMAP() from HDAData object.
+    
+        """
+        from ..reduction.umap import reduce_UMAP as _reduce_UMAP
+        return _reduce_UMAP(
+            data=data,
+            target=self,
+            key=key,
+            kind=kind,
+            trajectory_id=trajectory_id,
+            id=id
+            )

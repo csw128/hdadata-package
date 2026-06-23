@@ -81,7 +81,7 @@ def compute_similarity(
     # PCA case: when pre-computed pca matrix exist
     if key == "pca":
         if "pca" not in target.layers:
-            raise ValueError('PCA matrix not found in data.layers["pca"] '
+            raise ValueError('PCA matrix not found in HDAData.layers["pca"] '
                              'Run compute_PCA first.')
         vectors = target.layers["pca"]          
         labels = data.obs.index.tolist()  
