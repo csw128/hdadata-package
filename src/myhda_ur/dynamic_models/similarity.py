@@ -1,6 +1,7 @@
 from ..structure.object import HDAData
 from ..dynamic_models.distance import _calc_correlation, _calc_cosine
 from ..dynamic_models.representation import _get_vectors
+from ..dynamic_models.representation import _build_trajectory_matrix_pca
 import numpy as np
 import pandas as pd
 from collections.abc import Callable
@@ -83,9 +84,21 @@ def compute_similarity(
         if "pca" not in target.layers:
             raise ValueError('PCA matrix not found in HDAData.layers["pca"] '
                              'Run compute_PCA first.')
-        vectors = target.layers["pca"]          
-        labels = data.obs.index.tolist()  
-        name = f"{method}_pca_cell"             
+        
+        # traj
+        if kind == "trajectory":
+            vectors, labels = _build_trajectory_matrix_pca(
+                                    data=data,
+                                    pc_matrix=target.layers["pca"],
+                                    trajectory_id=trajectory_id
+                                )
+            name = f"{method}_pca_traj"    
+        
+        # cell
+        else:
+            vectors = target.layers["pca"]          
+            labels = data.obs.index.tolist()  
+            name = f"{method}_pca_cell"             
 
     else:
         # build vectors

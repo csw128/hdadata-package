@@ -1,5 +1,6 @@
 from ..structure.object import HDAData
 from ..dynamic_models.representation import _get_vectors
+from ..dynamic_models.representation import _build_trajectory_matrix_pca
 import scipy.sparse as sp
 import umap
 
@@ -17,7 +18,18 @@ def reduce_UMAP(
         if "pca" not in target.layers:
             raise ValueError('PCA matrix not found in HDAData.layers["pca"] '
                              'Run compute_PCA first.')
-        vectors = target.layers["pca"]          
+        
+        # traj
+        if kind == "trajectory":
+            vectors, _ = _build_trajectory_matrix_pca(
+                                data=data,
+                                pc_matrix=target.layers["pca"],
+                                trajectory_id=trajectory_id
+                            )
+        
+        # cell
+        else:
+            vectors = target.layers["pca"]          
     
     else:
         vectors, _ = _get_vectors(

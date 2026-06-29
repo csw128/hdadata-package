@@ -83,6 +83,6 @@ def compute_PCA(
     
     # store pc matrix 
     target.layers["pca"] = pca_matrix
-    print(f'PCA matrix {key} x {n_pc} PCs stored in data.layers["pca"] \n')
+    print(f'PCA matrix {kind} x {n_pc} PCs stored in data.layers["pca"] \n')
 
     return target

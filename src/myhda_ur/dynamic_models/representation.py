@@ -115,7 +115,46 @@ def _build_trajectory_matrix(
     vectors = np.vstack(vectors)
     
     return vectors, labels
+
+
+def _build_trajectory_matrix_pca(
+    data: HDAData,
+    pc_matrix: np.ndarray,
+    trajectory_id: list
+    ) -> tuple[np.ndarray, list[str]]:
+    """Build trajectory vectors from a pre-computed cell x PC matrix.
     
+    Args:
+        data: 
+            (subset) data object to analyze
+        pc_matrix:
+            ...
+        trajectory_id:
+            list of trajectory IDs to create vectors from
+    
+    Returns:
+        matrix of shape: (n_trajectories, PCs*timepoints), and labels
+        
+    """
+    trajectory_id = list(trajectory_id)
+    
+    vectors = []
+    labels = []
+
+    # build one vector per trajectory
+    for id in trajectory_id:
+        traj = data.trajectories.loc[id]
+        cells = traj.tolist()
+        cell_idx = [data._cell_to_index[c] for c in cells]
+
+        # extract PC x timepoints 
+        sub = pc_matrix[cell_idx, :].T    # transpose to (PCs x timepoints)
+        vec = sub.flatten()               
+        vectors.append(vec)
+        labels.append(f'traj_{id}')
+
+    return np.vstack(vectors), labels
+
 
 def _get_trajectory_vectors(
     data: HDAData,
