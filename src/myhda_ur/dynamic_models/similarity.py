@@ -92,5 +92,5 @@ def compute_similarity(
     similarity_df = pd.DataFrame(similarity, index=labels, columns=labels)
 
     target.similarities[name] = similarity_df
-    print(f'Similarity "{name}" stored!')
+    print(f'Similarity "{name}" stored! \n')
     return target

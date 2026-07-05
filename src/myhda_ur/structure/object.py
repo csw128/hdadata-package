@@ -1,6 +1,7 @@
 from typing import Optional, Dict, Union
 import scipy.sparse as sp
 import pandas as pd
+import numpy as np
 
 
 class HDAData:
@@ -40,6 +41,7 @@ class HDAData:
 
         self._validate()
         self._create_idx_maps()
+        self._compute_new_rna()
     
 
     def _validate(self) -> None:
@@ -292,6 +294,25 @@ class HDAData:
         return self.X[gene_idx, cell_idx]
     
     
+    def get_gene_expression(
+        self, 
+        gene: Union[str, int]
+        ) -> pd.Series:
+        
+        gene_idx = self._range_check(gene, "gene")
+
+        row = self.X[gene_idx, :]
+        if sp.issparse(row):
+            row = row.toarray().ravel()
+        else:
+            row = np.asarray(row).ravel()
+
+        cell_names = [self._index_to_cell[i] for i in range(self.n_obs)]
+        gene_name = gene if isinstance(gene, str) else self._index_to_gene[gene_idx]
+        
+        return pd.Series(row, index=cell_names, name=gene_name)
+        
+    
     def _get_item_to_indices(
         self, 
         key: Union[str, int, list, slice, None], 
@@ -322,6 +343,17 @@ class HDAData:
         # Case 3: list/array
         if isinstance(key, (list, tuple)):
             return [self._range_check(i, type) for i in key]
+        
+    
+    def _compute_new_rna(self) -> None:
+        """Compute new_rna = X * ntr and store it in layers
+        
+        """
+        if "new_rna" in self.layers:
+            return 
+        
+        new_rna = self.X.multiply(self.layers["ntr"]).tocsr()
+        self.layers["new_rna"] = new_rna
         
     
     def _subset_metadata(
