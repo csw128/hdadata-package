@@ -1,7 +1,6 @@
 from ..structure.object import HDAData
 from ..dynamic_models.distance import _calc_correlation, _calc_cosine
 from ..dynamic_models.representation import _get_vectors
-from ..dynamic_models.representation import _build_trajectory_matrix_pca
 import numpy as np
 import pandas as pd
 from collections.abc import Callable
@@ -50,7 +49,7 @@ def compute_similarity(
     key: str = None,
     kind: str = None,
     trajectory_id: list = None,
-    method: str = None
+    method: str = None,
     ) -> HDAData:
     """Helper function to build vectors and labels into similarity matrix, and feeds the result 
        back into the original data structure.
@@ -60,7 +59,7 @@ def compute_similarity(
             (subset) data object to analyze
         target: 
             location to store result - only for internal use by wrapper
-        key: "X" / "ntr" / "pca"
+        key: "X" / "ntr" / "pca_cell" / "pca_trajectory"
             data from the subset to analyze 
         kind: "gene" / "cell" / "trajectory"
             type of similarity 
@@ -79,52 +78,19 @@ def compute_similarity(
 
     metric = metrics[method]
 
-    # PCA case: when pre-computed pca matrix exist
-    if key == "pca":
-        if "pca" not in target.layers:
-            raise ValueError('PCA matrix not found in HDAData.layers["pca"] '
-                             'Run compute_PCA first.')
-        
-        # traj
-        if kind == "trajectory":
-            vectors, labels = _build_trajectory_matrix_pca(
-                                    data=data,
-                                    pc_matrix=target.layers["pca"],
-                                    trajectory_id=trajectory_id
-                                )
-            name = f"{method}_pca_traj"    
-        
-        # cell
-        else:
-            vectors = target.layers["pca"]          
-            labels = data.obs.index.tolist()  
-            name = f"{method}_pca_cell"             
+    vectors, labels = _get_vectors(
+                            data=data,
+                            target=target,
+                            key=key,
+                            kind=kind,
+                            trajectory_id=trajectory_id
+                        )
 
-    else:
-        # build vectors
-        vectors, labels = _get_vectors(
-                                data=data,
-                                key=key,
-                                kind=kind,
-                                trajectory_id=trajectory_id
-                            )
-        
-        name = f"{method}_{key}_{kind}"
+    name = f"{method}_{key}_{kind}"
 
-    # compute similarity matrix
-    similarity = _pairwise_similarity(
-                        vectors=vectors,
-                        metric=metric
-                    )
+    similarity = _pairwise_similarity(vectors=vectors, metric=metric)
+    similarity_df = pd.DataFrame(similarity, index=labels, columns=labels)
 
-    similarity_df = pd.DataFrame(
-                        similarity,
-                        index=labels,
-                        columns=labels
-                    )
-
-    # store result
     target.similarities[name] = similarity_df
-    print(f'Similarity "{name}" stored! \n')
-
+    print(f'Similarity "{name}" stored!')
     return target

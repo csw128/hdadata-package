@@ -9,7 +9,7 @@ def reduce_MDS(
     sim: pd.DataFrame,
     kind: str = None
     ) -> tuple[np.ndarray, str, str]:
-    """Dimensionality reduction using MDS on precomputed similarity matrix.
+    """Dimensionality reduction using metric MDS on precomputed similarity matrix.
     
         Args:
             target: 

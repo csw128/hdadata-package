@@ -69,6 +69,7 @@ def compute_PCA(
     
     vectors, _ = _get_vectors(
                         data=data,
+                        target=target,
                         key=key,
                         kind=kind,
                         trajectory_id=trajectory_id
@@ -82,7 +83,8 @@ def compute_PCA(
     pca_matrix = pca.fit_transform(vectors)
     
     # store pc matrix 
-    target.layers["pca"] = pca_matrix
-    print(f'PCA matrix {kind} x {n_pc} PCs stored in data.layers["pca"] \n')
+    name = f"pca_{kind}" 
+    target.layers[name] = pca_matrix
+    print(f'PCA matrix {kind} x {n_pc} PCs stored in HDAData.layers["{name}"] \n')
 
     return target

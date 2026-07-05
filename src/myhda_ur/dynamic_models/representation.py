@@ -197,17 +197,18 @@ def _get_trajectory_vectors(
 
 
 def _get_vectors(
-    data: HDAData,
-    key: str,
-    kind: str,
-    trajectory_id: list,
-    ) -> tuple[np.ndarray, list[str]]: 
+    data = None, 
+    target = None,
+    key = None, 
+    kind = None, 
+    trajectory_id = None
+    ):
     """Helper to call the corresponding functions to create gene, cell or trajectory vectors.
     
     Args:
         data: 
             (subset) data object to analyze
-        key: "X" / "ntr" / "new_rna"
+        key: "X" / "ntr" / "pca_cell" / "pca_trajectory" / "new_rna" 
             gene expression or NTR value to create vectors from
         kind: "gene" / "cell" / "trajectory"
             type of vectors to create
@@ -219,21 +220,33 @@ def _get_vectors(
         
     """
     if kind == "gene":
-
         vectors = _get_gene_vectors(data, key)
         labels = data.var.index.tolist()
 
     elif kind == "cell":
+        if key == "pca_cell":
+            vectors = target.layers["pca_cell"]  
+            labels = data.obs.index.tolist()
+            
+        else:
+            normalize = (key != "ntr")
+            vectors = _get_cell_vectors(data, key, normalize)
+            labels = data.obs.index.tolist()
 
-        normalize = (key != "ntr")
-        vectors = _get_cell_vectors(data, key, normalize)
-        labels = data.obs.index.tolist()
-        
     elif kind == "trajectory":
-        normalize = (key == "X")
-        vectors, labels = _get_trajectory_vectors(data, key, trajectory_id, normalize)
-        
-    else:
-        raise ValueError(f'Unknown kind "{kind}". Must be either "gene", "cell", or "trajectory".')
+        if key == "pca_trajectory":
+            vectors = target.layers["pca_trajectory"]
+            labels = [f"traj_{id}" for id in trajectory_id]
+            
+        elif key == "pca_cell":
+            vectors, labels = _build_trajectory_matrix_pca(
+                                    data=data,
+                                    pc_matrix=target.layers["pca_cell"],
+                                    trajectory_id=trajectory_id
+                                )
+            
+        else:
+            normalize = (key == "X")
+            vectors, labels = _get_trajectory_vectors(data, key, trajectory_id, normalize)
 
     return vectors, labels
