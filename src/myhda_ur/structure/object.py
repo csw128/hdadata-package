@@ -612,6 +612,7 @@ class HDAData:
             kind=kind
             )
     
+    
     def compute_PCA(  
         self,
         data,   
@@ -633,6 +634,7 @@ class HDAData:
             trajectory_id=trajectory_id,
             )
     
+    
     def reduce_UMAP(  
         self,
         data = None,  
@@ -652,4 +654,29 @@ class HDAData:
             kind=kind,
             trajectory_id=trajectory_id,
             id=id
+            )
+        
+        
+    def calc_cl_silhouette_score(  
+        self,
+        cl: pd.Series,
+        precomputed: bool,
+        sim: pd.DataFrame = None,
+        data = None,
+        key: str = None,
+        kind: str = None,
+        trajectory_id: list = None
+        ):
+        """Wrapper method to call calc_cl_silhouette_score() from HDAData object.
+    
+        """
+        from ..clustering.evaluate import calc_cl_silhouette_score as _calc_cl_silhouette_score
+        return _calc_cl_silhouette_score(
+            cl=cl,
+            precomputed=precomputed,
+            sim=sim,
+            data=data,
+            key=key,
+            kind=kind,
+            trajectory_id=trajectory_id
             )

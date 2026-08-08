@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import pandas as pd
+import numpy as np
 
 
 # def plot_scatter(
@@ -74,7 +75,8 @@ def plot_scatter(
     mask: pd.Series = None,
     title: str = None,
     show_label: bool = False,
-    legend_label: str = None
+    legend_label: str = None,
+    clip_percentile: tuple = (5, 95)
     ) -> None:
     """Flexible scatter plot on a fixed UMAP embedding. Supports four modes,
        chosen by which arguments are given:
@@ -96,7 +98,7 @@ def plot_scatter(
     fig, ax = plt.subplots(figsize=(8, 6))
     cmap = "RdYlBu"
 
-    # ---- Mode 1: cluster given, no highlight -> all clusters, own colors ----
+    # Mode 1: cluster given, no highlight -> all clusters, own colors
     if cluster is not None and highlight is None:
         cell_names = cluster.index.tolist()
         cluster_labels = cluster.values
@@ -123,7 +125,6 @@ def plot_scatter(
         )
 
     else:
-        # ---- Modes 2-5: single highlighted group, rest grey ----
         highlight_color = None
 
         if cluster is not None:
@@ -150,9 +151,13 @@ def plot_scatter(
         if values is not None and mask is not None:
             mask = mask.reindex(values.index)
 
+        # compute clip range from the full values (mode 3 and mode 5 always share the same color scale regardless of masking)
+        if values is not None:
+            vmin, vmax = np.percentile(values.values, clip_percentile)
+        
         if values is not None and mask is None:
             # Mode 3: continuous color across all cells
-            sc = ax.scatter(coords[:, 0], coords[:, 1], c=values.values, cmap=cmap, zorder=2)
+            sc = ax.scatter(coords[:, 0], coords[:, 1], c=values.values, cmap=cmap, vmin=vmin, vmax=vmax, zorder=2)
             cbar = fig.colorbar(sc, ax=ax)
             cbar.set_label(legend_label or values.name or "value")
 
@@ -170,7 +175,6 @@ def plot_scatter(
             mask_vals = mask.values.astype(bool)
 
             ax.scatter(coords[~mask_vals, 0], coords[~mask_vals, 1], color="lightgrey", label="_nolegend_", zorder=1)
-            sc = ax.scatter(coords[mask_vals, 0], coords[mask_vals, 1], c=values.values[mask_vals], cmap=cmap, zorder=2)
             cbar = fig.colorbar(sc, ax=ax)
             cbar.set_label(legend_label or values.name or "value")
 
