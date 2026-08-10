@@ -224,8 +224,8 @@ def _get_vectors(
         labels = data.var.index.tolist()
 
     elif kind == "cell":
-        if key == "pca_cell":
-            vectors = target.layers["pca_cell"]  
+        if key is not None and key.startswith("pca_cell"):
+            vectors = target.layers[key]  
             labels = data.obs.index.tolist()
             
         else:
@@ -234,14 +234,14 @@ def _get_vectors(
             labels = data.obs.index.tolist()
 
     elif kind == "trajectory":
-        if key == "pca_trajectory":
-            vectors = target.layers["pca_trajectory"]
+        if key is not None and key.startswith("pca_trajectory"):
+            vectors = target.layers[key]
             labels = [f"traj_{id}" for id in trajectory_id]
             
-        elif key == "pca_cell":
+        elif key is not None and key.startswith("pca_cell"):
             vectors, labels = _build_trajectory_matrix_pca(
                                     data=data,
-                                    pc_matrix=target.layers["pca_cell"],
+                                    pc_matrix=target.layers[key],
                                     trajectory_id=trajectory_id
                                 )
             

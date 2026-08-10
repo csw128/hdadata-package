@@ -2,13 +2,11 @@ import numpy as np
 import pandas as pd
 from ..structure.object import HDAData
 from ..dynamic_models.representation import _get_vectors
-import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def plot_heatmap_cluster(
+def plot_heatmap_per_cluster(
     data: HDAData = None,
     cluster: pd.Series = None,
     key: str = None,

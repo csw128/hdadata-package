@@ -1,7 +1,5 @@
 from ..structure.object import HDAData
 from ..dynamic_models.representation import _get_vectors
-from ..dynamic_models.representation import _build_trajectory_matrix_pca
-import scipy.sparse as sp
 import umap
 
 
@@ -32,7 +30,10 @@ def reduce_UMAP(
 
     em = (coords, xlabel, ylabel)
 
-    name = f"umap_{kind}_{id}"
+    if id:
+        name = id
+    else:
+        name = f"umap_{key}_{kind}"
 
     target.embeddings[name] = em
     print(f'UMAP embedding "{name}" stored! \n')

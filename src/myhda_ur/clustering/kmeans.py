@@ -66,7 +66,8 @@ def cluster_kmeans(
     key: str = None,
     kind: str = None,
     trajectory_id: list = None,
-    k: int = 3
+    k: int = 3,
+    id: str = None
     ) -> HDAData:
     """KMeans clustering on gene/cell/trajectory vectors.
     
@@ -106,7 +107,10 @@ def cluster_kmeans(
                 )
     kmeans.fit(vectors)
     
-    name = f"kmeans_k{k}_{kind}"
+    if id:
+        name = id
+    else:
+        name = f"kmeans_k{k}_{kind}"
     
     cl = pd.Series(
             kmeans.labels_,

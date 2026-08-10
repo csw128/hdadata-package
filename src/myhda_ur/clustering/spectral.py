@@ -8,7 +8,8 @@ def cluster_spectral(
     target: HDAData,    
     sim: pd.DataFrame,  
     kind: str = None,
-    k: int = None
+    k: int = None,
+    id: str = None
     ) -> HDAData:
     """Spectral (graph-based) clustering on similarity matrix.
     
@@ -43,7 +44,10 @@ def cluster_spectral(
                 )
     clustering.fit(affinity)
     
-    name = f"spectral_k{k}_{kind}"
+    if id:
+        name = id
+    else:
+        name = f"spectral_k{k}_{kind}"
     
     cl = pd.Series(
             clustering.labels_,   

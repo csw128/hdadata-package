@@ -36,7 +36,8 @@ def cluster_hierarchical(
     sim: pd.DataFrame,  
     kind: str = None,
     k: int = None,
-    t: float = None
+    t: float = None,
+    id: str = None
     ) -> HDAData:
     """Agglomerative hierarchical clustering on similarity matrix.
 
@@ -66,12 +67,18 @@ def cluster_hierarchical(
     # extract clusters at a specific distance threshold
     if t is not None:
         clusters = fcluster(Z, t=t, criterion='distance')
-        name = f"hierarchical_t{t}_{kind}" 
+        if id:
+            name = id
+        else:
+            name = f"hierarchical_t{t}_{kind}" 
     
     # extract clusters with fixed k
     elif k is not None:
         clusters = fcluster(Z, t=k, criterion='maxclust')
-        name = f"hierarchical_k{k}_{kind}" 
+        if id:
+            name = id
+        else:
+            name = f"hierarchical_k{k}_{kind}" 
    
     else:
         raise ValueError("Provide either k clusters or t threshold distance.")

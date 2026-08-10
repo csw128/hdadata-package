@@ -69,5 +69,4 @@ def calc_cl_silhouette_score(
 
         score = silhouette_score(vectors_.values, cl_.values, metric="euclidean")
     
-    print(f"Silhouette score: {score:.5f}")
     return score

@@ -50,6 +50,7 @@ def compute_similarity(
     kind: str = None,
     trajectory_id: list = None,
     method: str = None,
+    id: str = None
     ) -> HDAData:
     """Helper function to build vectors and labels into similarity matrix, and feeds the result 
        back into the original data structure.
@@ -86,7 +87,10 @@ def compute_similarity(
                             trajectory_id=trajectory_id
                         )
 
-    name = f"{method}_{key}_{kind}"
+    if id:
+        name = id
+    else:
+        name = f"{method}_{key}_{kind}"
 
     similarity = _pairwise_similarity(vectors=vectors, metric=metric)
     similarity_df = pd.DataFrame(similarity, index=labels, columns=labels)
