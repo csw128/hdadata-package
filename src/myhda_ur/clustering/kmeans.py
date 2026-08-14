@@ -10,6 +10,7 @@ warnings.filterwarnings('ignore')
 
 def find_kmeans_k(
     data: HDAData,
+    target: HDAData,
     key: str,
     kind: str,
     trajectory_id: list = None,
@@ -20,7 +21,9 @@ def find_kmeans_k(
         Args:
             data: 
                 (subset) data object to analyze
-            key: "X" / "ntr" 
+            target: 
+                location to store result - only for internal use by wrapper
+            key: "X" / "ntr" / "new_rna" / "pca_cell" / "pca_trajectory" 
                 values to compute on 
             kind: "gene" / "cell" / "trajectory"
                 type of cluster elements
@@ -35,6 +38,7 @@ def find_kmeans_k(
     """
     vectors, _ = _get_vectors(
                             data=data,
+                            target=target,
                             key=key,
                             kind=kind,
                             trajectory_id=trajectory_id
@@ -79,7 +83,7 @@ def cluster_kmeans(
                 (subset) data object to analyze
             target: 
                 location to store result - only for internal use by wrapper
-            key: "X" / "ntr" 
+            key: "X" / "ntr" / "new_rna" / "pca_cell" / "pca_trajectory" 
                 values to compute on 
             kind: "gene" / "cell" / "trajectory"
                 type of cluster elements
@@ -87,13 +91,16 @@ def cluster_kmeans(
                 selected trajectories to analyze
             k:
                 number of clusters
+            id: 
+                name identifier of resulting cluster labels
     
         Returns:
-           object with cluster labels stored 
+           cluster labels stored in HDAData.clusters
                 
     """
     vectors, labels = _get_vectors(
                         data=data,
+                        target=target,
                         key=key,
                         kind=kind,
                         trajectory_id=trajectory_id

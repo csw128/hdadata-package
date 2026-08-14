@@ -17,20 +17,23 @@ def plot_line(
         - (in subplots) the elements in each cluster and its mean 
         - the mean of each cluster in a single plot
     
-    Args:
-        data:
-            (subset) data object to analyze
-        cluster:
-            cluster result stored in HData.clusters
-        key: "X" / "ntr"
-            values to compute on 
-        kind: "gene" / "cell" / "trajectory"
-            type of cluster elements
-        trajectory_id: 
-            selected trajectories to analyze
-        gene_sym:
-            gene to visualize. If None, plots mean across all genes
-        
+        Args:
+            data:
+                (subset) data object to analyze
+            cluster:
+                cluster result stored in HData.clusters
+            key: "X" / "ntr" / "new_rna"
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements
+            trajectory_id: 
+                selected trajectories to analyze
+            gene_sym:
+                specific gene to visualize. If None, plots mean across all genes
+    
+        Returns:
+            line graph
+            
     """
     labels = cluster.index.tolist()
     cluster_labels = cluster.values

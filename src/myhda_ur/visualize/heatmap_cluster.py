@@ -15,20 +15,20 @@ def plot_heatmap_per_cluster(
     ) -> go.Figure:
     """Plot per-cluster expression heatmaps (genes x timepoints), where each subplot shows mean expression of genes across trajectories in a cluster.
     
-    Args:
-        data:
-            (subset) data object to analyze
-        cluster:
-            cluster result stored in HDAData.clusters
-        key: "X" / "ntr"
-            values to compute on
-        kind: "trajectory"
-            type of cluster elements (only trajectory supported)
-        trajectory_id:
-            selected trajectories to analyze
+        Args:
+            data:
+                (subset) data object to analyze
+            cluster:
+                cluster result stored in HDAData.clusters
+            key: "X" / "ntr" / "new_rna"
+                values to compute on
+            kind: "trajectory"
+                type of cluster elements (only trajectory supported)
+            trajectory_id:
+                selected trajectories to analyze
 
-    Returns:
-        Per-cluster heatmap 
+        Returns:
+            Per-cluster heatmap 
     
     """
     if kind != "trajectory":

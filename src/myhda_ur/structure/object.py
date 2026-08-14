@@ -298,7 +298,9 @@ class HDAData:
         self, 
         gene: Union[str, int]
         ) -> pd.Series:
-        
+        """Get gene expression value for specific gene. 
+                
+        """
         gene_idx = self._range_check(gene, "gene")
 
         row = self.X[gene_idx, :]
@@ -438,7 +440,8 @@ class HDAData:
         key: str = None,
         kind: str = None,
         trajectory_id: list = None,
-        method: str = None
+        method: str = None,
+        id: str = None
         ):
         """Wrapper method to call compute_similarity() from HDAData object.
      
@@ -450,7 +453,8 @@ class HDAData:
             key=key,
             kind=kind,
             trajectory_id=trajectory_id,
-            method=method
+            method=method,
+            id=id
         )
 
 
@@ -510,6 +514,7 @@ class HDAData:
         from ..clustering.kmeans import find_kmeans_k as _find_kmeans_k
         return _find_kmeans_k(
             data=data,
+            target=self,
             key=key,
             kind=kind,
             trajectory_id=trajectory_id,
@@ -523,7 +528,8 @@ class HDAData:
         key: str = None,
         kind: str = None,
         trajectory_id: list = None,
-        k: int = 3
+        k: int = 3,
+        id: str = None
         ):
         """Wrapper method to call cluster_kmeans() from HDAData object.
     
@@ -535,7 +541,8 @@ class HDAData:
             key=key,
             kind=kind,
             trajectory_id=trajectory_id,
-            k=k
+            k=k,
+            id=id
             )
         
         
@@ -544,7 +551,8 @@ class HDAData:
         sim: pd.DataFrame,  
         kind: str = None,
         k: int = None,
-        t: float = None
+        t: float = None,
+        id: str = None
         ):
         """Wrapper method to call cluster_hierarchical() from HDAData object.
     
@@ -555,7 +563,8 @@ class HDAData:
             sim=sim,
             kind=kind,
             k=k,
-            t=t
+            t=t,
+            id=id
             )
         
         
@@ -563,7 +572,8 @@ class HDAData:
         self,
         sim: pd.DataFrame,  
         kind: str = None,
-        k: int = None
+        k: int = None,
+        id: str = None
         ):
         """Wrapper method to call cluster_spectral() from HDAData object.
     
@@ -573,46 +583,10 @@ class HDAData:
             target=self,
             sim=sim,
             kind=kind,
-            k=k
+            k=k,
+            id=id
             )
         
-    
-    def reduce_PCA(  
-        self,
-        data,   
-        key: str = None,
-        kind: str = None,
-        trajectory_id: list = None,
-        ):
-        """Wrapper method to call reduce_PCA() from HDAData object.
-    
-        """
-        from ..reduction.pca import reduce_PCA as _reduce_PCA
-        return _reduce_PCA(
-            data=data,   
-            target=self,
-            key=key,
-            kind=kind,
-            trajectory_id=trajectory_id,
-            )
-    
-    
-    def reduce_MDS(  
-        self,
-        sim: pd.DataFrame,
-        kind: str = None
-        ):
-        """Wrapper method to call reduce_MDS() from HDAData object.
-    
-        """
-        from ..reduction.mds import reduce_MDS as _reduce_MDS
-        return _reduce_MDS(
-            target=self,
-            sim=sim,
-            kind=kind
-            )
-    
-    
     def compute_PCA(  
         self,
         data,   
@@ -620,6 +594,7 @@ class HDAData:
         kind: str = None,
         n_pc: int = None,
         trajectory_id: list = None,
+        id: str = None
         ):
         """Wrapper method to call compute_PCA() from HDAData object.
     
@@ -632,6 +607,7 @@ class HDAData:
             kind=kind,
             n_pc=n_pc,
             trajectory_id=trajectory_id,
+            id=id
             )
     
     

@@ -11,7 +11,26 @@ def reduce_UMAP(
     trajectory_id: list = None,
     id: str = None
     ) -> HDAData:
+    """Reduce dimensionality with UMAP to obtain 2-dimensional embedding coordinates for plotting graphs.
+
+        Args:
+            data: 
+                (subset) data object to analyze
+            target: 
+                location to store result - only for internal use by wrapper
+            key: "X" / "ntr" / "new_rna" / "pca_cell" / "pca_trajectory" 
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of elements
+            trajectory_id: 
+                selected trajectories to analyze
+            id:
+                name identifier of resulting embeddings
     
+        Returns:
+            embeddings stored in HDAData.embeddings
+        
+        """
     vectors, _ = _get_vectors(
                             data=data,
                             target=target,
@@ -35,6 +54,7 @@ def reduce_UMAP(
     else:
         name = f"umap_{key}_{kind}"
 
+    # store result
     target.embeddings[name] = em
     print(f'UMAP embedding "{name}" stored! \n')
 

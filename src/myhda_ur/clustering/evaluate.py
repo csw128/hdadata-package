@@ -13,28 +13,38 @@ def calc_cl_silhouette_score(
     kind: str = None,
     trajectory_id: list = None
     ) -> float:
-    """Compute Silhouette Score for a clustering result, independent of clustering algorithm.
+    """Compute Silhouette Score for a clustering result (independent of clustering algorithm).
         Silhouette Score is computed from the distance between a point, its cluster, and the nearest cluster.
         Score ranges (+1 to -1) as best clusters to worst. Values near 0 indicate overlapping clusters. 
 
        Args:
             cl:
-                cluster labels (pd.Series, indexed by cell/gene/trajectory name)
+                cluster labels
             precomputed:
-                True: `sim` is a similarity matrix (spectral/hierarchical)
-                False: raw vectors are built via _get_vectors (kmeans)
+                True:  if sim matrix is used (spectral/hierarchical)
+                False: if raw vectors required (kmeans)
             sim:
                 similarity matrix
-            data, key, kind, trajectory_id:
-                passed through to _get_vectors (required if precomputed=False for kmeans case)
-
+            
+            The following arguments are only needed for kmeans, where precomputed=False:
+            
+            data: 
+                (subset) data object to analyze
+            key: "X" / "ntr" / "new_rna" / "pca_cell" / "pca_trajectory" 
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements
+            trajectory_id: 
+                selected trajectories to analyze
+        
         Returns:
             float Silhouette Score
+        
     """
     # Case 1: spectral / hierarchical
     if precomputed:
         if sim is None:
-            raise ValueError("`sim` is required when precomputed=True")
+            raise ValueError("`sim` is required when precomputed=True for Spectral / Hierarchical Clustering")
 
         common = cl.index.intersection(sim.index)
         sim_ = sim.loc[common, common]
@@ -51,6 +61,9 @@ def calc_cl_silhouette_score(
 
     # Case 2: kmeans
     else:
+        if (data is None) or (key is None) or (kind is None) or (trajectory_id is None):
+            raise ValueError(" 'data', 'key', 'kind' are required when precomputed=False for KMeans Clustering")
+                
         vectors, labels = _get_vectors(
             data=data,
             key=key,

@@ -61,16 +61,18 @@ def compute_similarity(
         target: 
             location to store result - only for internal use by wrapper
         key: "X" / "ntr" / "pca_cell" / "pca_trajectory"
-            data from the subset to analyze 
+            values to compute on
         kind: "gene" / "cell" / "trajectory"
             type of similarity 
         trajectory_id: 
             selected trajectories to analyze
         method: "correlation" / "cosine"
             distance metric
+        id:
+            name identifier of the resulting sim matrix
     
     Returns:
-        object with similarity matrix stored 
+        sim matrix stored in HDAData.similarities
             
     """
     # validate metric

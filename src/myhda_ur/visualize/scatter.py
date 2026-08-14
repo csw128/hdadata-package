@@ -27,6 +27,30 @@ def plot_scatter(
         5. values + mask               -> continuous color restricted to
                                            masked cells, rest grey
 
+        Args:
+            embedding:
+                embeddings stored in HDAData.embeddings
+            cluster:
+                clusters stored in HData.clusters
+            highlight:
+                single cluster label to isolate
+            values:
+                continuous per-cell values (e.g. gene expression)
+            mask: 
+                boolean pd.Series indicating which cells to highlight or include (e.g. timepoint membership)
+            title: 
+                user-defined plot title
+            show_label:
+                True  = shows names of cell / trajectory
+                False = hides names of cell / trajectory
+            legend_label:
+                label used for the legend entry (e.g timepoint) or colorbar (e.g gene name)
+            clip_percentile:
+                (low, high) percentile pair used to clip the color bar range 
+        
+        Returns:
+            scatter plot
+                    
     """
     if cluster is None and values is None and mask is None:
         raise ValueError("Provide at least one of `cluster`, `values`, or `mask`.")

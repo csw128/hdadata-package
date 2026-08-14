@@ -22,14 +22,16 @@ def cluster_spectral(
             target: 
                 location to store result - only for internal use by wrapper
             sim: 
-                similarity dataframe stored
+                similarity matrix
             kind: "gene" / "cell" / "trajectory"
                 type of cluster elements
             k:
                 number of clusters
+            id: 
+                name identifier of resulting cluster labels
 
         Returns:
-            object with cluster labels stored 
+            cluster labels stored in HDAData.clusters
             
     """
     labels = list(sim.index)

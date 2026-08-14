@@ -14,19 +14,19 @@ def plot_heatmap(
     ) -> go.Figure:
     """Plot similarity heatmap with or without clustered dendograms
     
-    Args:
-        sim: 
-            similarity dataframe stored
-        type: "gene" / "cell" / "trajectories"
-            heatmap type of similarity to be used to plot title
-        show_cluster: True / False
-            True  = clustered heatmap with dendograms
-            False = regular heatmap without cluster
-        title: 
-            user-specificed title of the plot
-            
-    Returns:
-        Interactive similarity heatmap
+        Args:
+            sim: 
+                similarity matrix
+            type: "gene" / "cell" / "trajectories"
+                heatmap type of similarity to be used to plot title
+            show_cluster: True / False
+                True  = clustered heatmap with dendograms
+                False = regular heatmap without cluster
+            title: 
+                user-defined plot title
+                
+        Returns:
+            Interactive similarity heatmap
         
     """
     labels = list(sim.index)

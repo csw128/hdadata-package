@@ -14,12 +14,12 @@ def _get_linkage(
     
         Args:
             sim: 
-                similarity dataframe stored
+                similarity matrix
                     
         Returns:
             Tuple of:
-                - Z: Linkage matrix 
-                - labels: List of sample labels from the similarity matrix index
+            - Z: Linkage matrix 
+            - labels: List of sample labels from the similarity matrix index
             
     """
     labels = list(sim.index)
@@ -50,16 +50,18 @@ def cluster_hierarchical(
             target: 
                 location to store result - only for internal use by wrapper
             sim: 
-                similarity dataframe stored
+                similarity matrix
             kind: "gene" / "cell" / "trajectory"
                 type of cluster elements
             k:
                 number of clusters
             t: 
                 distance threshold for cutting the dendogram
+            id:
+                name identifier of resulting cluster labels
     
         Returns:
-            object with cluster labels stored 
+            cluster labels stored in HDAData.clusters
     
     """
     Z, labels = _get_linkage(sim)

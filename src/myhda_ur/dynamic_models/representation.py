@@ -13,8 +13,8 @@ def _get_gene_vectors(
     Args:
         data: 
             (subset) data object to analyze
-        key: "X" / "ntr" 
-            gene expression or NTR value to create vectors from
+        key: "X" / "ntr" / "new_rna"
+            values to create vectors from
 
     Returns:
         gene vectors
@@ -23,8 +23,8 @@ def _get_gene_vectors(
     if key == "X":
         dense = data.X.toarray()
     
-    elif key == "pca":
-        raise ValueError('key="pca" is not valid for kind="gene". Only valid for kind="cell".')
+    elif "pca" in key:
+        raise ValueError('"pca" is not valid for kind="gene". Only valid for kind="cell".')
     
     elif key in data.layers:
         dense = data.layers[key].toarray()
@@ -45,11 +45,11 @@ def _get_cell_vectors(
     Args:
         data:
             (subset) data object to analyze
-        key: "X" / "ntr" 
-            gene expression or NTR value to create vectors from
+        key: "X" / "ntr" / "new_rna"
+            values to create vectors from
         normalize: True / False
-            True = normalize if gene expression values used
-            False = no normalization if ntr used
+            True = normalize if key="X" 
+            False = no normalization 
             
     Returns:
         cell vectors
@@ -77,17 +77,17 @@ def _build_trajectory_matrix(
     key: sp.csr_matrix,
     trajectory_id: list
     ) -> tuple[np.ndarray, list[str]]: 
-    """For each trajectory, extract gene expression or NTR values for all cells belonging to 
+    """For each trajectory, extract gene expression / ntr / new_rna values for all cells belonging to 
     that trajectory and flattens them into a single vector of shape (genes x timepoints).
     All trajectory vectors are stacked row-wise.
 
     Args:
         data: 
             (subset) data object to analyze
-        key: data.X / data.layers["ntr"]
-            gene expression or NTR matrix
+        key: "X" / "ntr" / "new_rna"
+            values to compute on 
         trajectory_id:
-            list of trajectory IDs to create vectors from
+            selected trajectories to analyze
     
     Returns:
         matrix of shape (trajectories x genes*timepoints), and labels
@@ -128,9 +128,9 @@ def _build_trajectory_matrix_pca(
         data: 
             (subset) data object to analyze
         pc_matrix:
-            ...
+            pre-computed cell x PC matrix
         trajectory_id:
-            list of trajectory IDs to create vectors from
+            selected trajectories to analyze
     
     Returns:
         matrix of shape: (n_trajectories, PCs*timepoints), and labels
@@ -167,13 +167,13 @@ def _get_trajectory_vectors(
     Args:
         data: 
             (subset) data object to analyze
-        key: "X" / "ntr" 
-            gene expression or NTR value to create vectors from
+        key: "X" / "ntr" / "new_rna"
+            values to compute on 
         trajectory_id:
-            list of trajectory IDs to create vectors from
+            selected trajectories to analyze
         normalize: True / False
-            True = normalize if gene expression values used
-            False = no normalization if ntr used
+            True = normalize if key="X"
+            False = no normalization 
             
     Returns:
         trajectory vectors and labels
@@ -208,12 +208,12 @@ def _get_vectors(
     Args:
         data: 
             (subset) data object to analyze
-        key: "X" / "ntr" / "pca_cell" / "pca_trajectory" / "new_rna" 
-            gene expression or NTR value to create vectors from
+        key: "X" / "ntr" / "new_rna" / "pca_cell" / "pca_trajectory" 
+            values to compute on 
         kind: "gene" / "cell" / "trajectory"
             type of vectors to create
         trajectory_id:
-            list of trajectory IDs to create vectors from
+            selected trajectories to analyze
     
     Returns:
         vectors and labels
