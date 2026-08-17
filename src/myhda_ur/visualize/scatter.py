@@ -15,7 +15,7 @@ def plot_scatter(
     legend_label: str = None,
     clip_percentile: tuple = (5, 95)
     ) -> None:
-    """Flexible scatter plot on a fixed UMAP embedding. Supports four modes,
+    """Flexible scatter plot on a fixed UMAP embedding. Supports five modes,
        chosen by which arguments are given:
 
         1. cluster only                -> all clusters, each its own color
