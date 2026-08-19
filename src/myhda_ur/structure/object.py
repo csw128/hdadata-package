@@ -419,10 +419,17 @@ class HDAData:
         obs_sub = self._subset_metadata(self.obs, obs_idx)
 
         # Subset layers
+        # layers_sub = {
+        #     k: (v[:, obs_idx] if isinstance(var_idx, slice) and var_idx == slice(None) 
+        #         else v[var_idx, :][:, obs_idx])
+        #     for k, v in self.layers.items()
+        # }
+        
         layers_sub = {
             k: (v[:, obs_idx] if isinstance(var_idx, slice) and var_idx == slice(None) 
                 else v[var_idx, :][:, obs_idx])
             for k, v in self.layers.items()
+            if not k.startswith("pca_")
         }
 
         return HDAData(
@@ -430,7 +437,7 @@ class HDAData:
             obs=obs_sub, 
             var=var_sub, 
             layers=layers_sub, 
-            trajectories=self.trajectories
+            trajectories=self.trajectories.copy()
         )
     
     

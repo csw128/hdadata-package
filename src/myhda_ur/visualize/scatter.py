@@ -132,10 +132,13 @@ def plot_scatter(
             ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", borderaxespad=0, frameon=True)
 
         else:
-            # Mode 5: continuous restricted to masked cells
             mask_vals = mask.values.astype(bool)
 
             ax.scatter(coords[~mask_vals, 0], coords[~mask_vals, 1], color="lightgrey", label="_nolegend_", zorder=1)
+            sc = ax.scatter(
+                coords[mask_vals, 0], coords[mask_vals, 1],
+                c=values.values[mask_vals], cmap=cmap, vmin=vmin, vmax=vmax, zorder=2
+            )
             cbar = fig.colorbar(sc, ax=ax)
             cbar.set_label(legend_label or values.name or "value")
 
