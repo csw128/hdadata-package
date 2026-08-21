@@ -1,0 +1,134 @@
+from ..structure.object import HDAData
+from ..dynamic_models.representation import _get_vectors
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def plot_line(
+    data: HDAData = None,
+    cluster: pd.Series = None,            
+    key: str = None,
+    kind: str = None,
+    trajectory_id: list = None,
+    gene_sym: str = None
+    ) -> None:
+    """Plot line graphs to visualize:
+        - (in subplots) the elements in each cluster and its mean 
+        - the mean of each cluster in a single plot
+    
+        Args:
+            data:
+                (subset) data object to analyze
+            cluster:
+                cluster result stored in HData.clusters
+            key: "X" / "ntr" / "new_rna"
+                values to compute on 
+            kind: "gene" / "cell" / "trajectory"
+                type of cluster elements
+            trajectory_id: 
+                selected trajectories to analyze
+            gene_sym:
+                specific gene to visualize. If None, plots mean across all genes
+    
+        Returns:
+            line graph
+            
+    """
+    labels = cluster.index.tolist()
+    cluster_labels = cluster.values
+    
+    k = len(np.unique(cluster_labels))
+    
+    vectors, vec_labels = _get_vectors(
+                            data=data,
+                            key=key,
+                            kind=kind,
+                            trajectory_id=trajectory_id
+                        )
+    
+    # realign vector index
+    vectors = vectors[pd.Index(vec_labels).get_indexer(labels)]
+    
+    if kind == "trajectory":
+        n_timepoints = len(data.trajectories.columns)
+        n_genes = vectors.shape[1] // n_timepoints
+
+        # unflatten trajectory vector to (n_trajs, n_genes, n_timepoints)
+        unflattened = vectors.reshape(len(labels), n_genes, n_timepoints)
+        
+        if gene_sym is not None:
+            # map gene symbol to index pos in data.var.index
+            if gene_sym not in data.var.index:
+                raise ValueError(f"Gene '{gene_sym}' not found in data.var.index.")
+            gene_idx = data.var.index.get_loc(gene_sym)
+            # extract only the specific gene's values (n_trajs, n_timepoints)
+            plot_vectors = unflattened[:, gene_idx, :]
+            ylabel = f'{key}'
+        else:
+            # default: mean across all genes per trajectory
+            plot_vectors = unflattened.mean(axis=1)
+            ylabel = f'Mean {key} across genes'
+        
+        xlabel = "Timepoint"
+        timepoints = data.trajectories.columns
+    
+    elif kind == "gene":
+        plot_vectors = vectors
+        xlabel = "Cell index"
+        ylabel = f'{key}'
+        timepoints = None
+
+    elif kind == "cell":
+        plot_vectors = vectors
+        xlabel = "Gene index"
+        ylabel = f'{key}'
+        timepoints = None
+
+    fig, axes = plt.subplots(1, k + 1, figsize=(4 * (k + 1), 4), sharey=True)
+    cmap = plt.get_cmap("tab10")
+    
+    cluster_means = []
+
+    for cluster_idx in range(k):
+        ax = axes[cluster_idx]
+        mask = cluster_labels == cluster_idx
+        cluster_vecs = plot_vectors[mask]
+        cluster_names = [l for l, m in zip(labels, mask) if m]
+
+        # plot individual lines in each cluster
+        for vec, name in zip(cluster_vecs, cluster_names):
+            ax.plot(vec, alpha=0.4, color=cmap(cluster_idx), linewidth=1)
+
+        # plot cluster mean line
+        mean_vec = cluster_vecs.mean(axis=0)
+        cluster_means.append(mean_vec)
+        ax.plot(mean_vec, color=cmap(cluster_idx), linewidth=2.5, linestyle="--", label="mean")
+
+        if kind == "trajectory" and timepoints is not None:
+            ax.set_xticks(range(len(timepoints)))
+            ax.set_xticklabels(timepoints)
+            
+        ax.set_title(f"Cluster {cluster_idx}")
+        ax.set_xlabel(xlabel)
+        if cluster_idx == 0:
+            ax.set_ylabel(ylabel)
+        ax.legend(fontsize=7, loc="upper left")
+
+    # plot combined overlap of cluster mean lines
+    ax_combined = axes[-1]
+    for cluster_idx, mean_vec in enumerate(cluster_means):
+        ax_combined.plot(mean_vec, color=cmap(cluster_idx), linewidth=2.5, label=f"Cluster {cluster_idx}")
+    
+    if kind == "trajectory" and timepoints is not None:
+        ax_combined.set_xticks(range(len(timepoints)))
+        ax_combined.set_xticklabels(timepoints)
+    
+    ax_combined.set_title("Cluster means")
+    ax_combined.set_xlabel(xlabel)
+    ax_combined.legend(fontsize=7, loc="upper left")
+
+    sub_title = f' - gene {gene_sym}' if (gene_sym and kind == "trajectory") else ''
+    plt.suptitle(f'Overview of Cluster Analysis{sub_title}', y=1.02)
+    plt.tight_layout()
+    plt.show()

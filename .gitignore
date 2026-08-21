@@ -1,6 +1,4 @@
-data/
 .vscode/
 __pycache__/
-high_dimensional_analysis_CSW.egg-info/
-myhda_ur.egg-info/
-temp/
+hdadata.egg-info/
+data/
